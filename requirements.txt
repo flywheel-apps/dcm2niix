@@ -1,0 +1,6 @@
+flywheel-sdk==11.3.3
+nibabel==3.0.2
+nipype==1.4.2
+numpy==1.18.4
+pydeface==2.0.0
+pydicom==1.4.2
