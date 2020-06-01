@@ -1,8 +1,0 @@
-{
-  "config": {
-      "pydeface": true,
-      "pydeface_cost": "mutualinfo",
-      "pydeface_nocleanup": false,
-      "pydeface_verbose": false
-  }
-}

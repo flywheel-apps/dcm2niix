@@ -75,7 +75,7 @@
           "default": "n"
       },
       "coil_combine": {
-          "description": "For sequences with individual coil data, saved as individual volumes, this option will save a NIfTI file with ONLY the combined coil data (i.e., the last volume). Options: true, false (default). WARNING: We make no effort to check for independent coil data, we simply trust that if you have selcted this option you know what you are asking for.",
+          "description": "For sequences with individual coil data, saved as individual volumes, this option will save a NIfTI file with ONLY the combined coil data (i.e., the last volume). Options: true, false (default). WARNING: Expert Option. We make no effort to check for independent coil data, we simply trust that if you have selcted this option you know what you are asking for.",
           "type": "boolean",
           "default": false
       },
@@ -92,7 +92,7 @@
           "maximum": 9
       },
       "convert_only_series": {
-          "description": "Selectively convert by series number - can be used up to 16 times. Options: 'all' (default), space-separated list of series numbers (e.g., '2 12 20')",
+          "description": "Selectively convert by series number - can be used up to 16 times. Options: 'all' (default), space-separated list of series numbers (e.g., '2 12 20'). WARNING: Expert Option. We trust that if you have selcted this option you know what you are asking for.",
           "type": "string",
           "default": "all"
       },

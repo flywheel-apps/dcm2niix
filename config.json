@@ -1,7 +1,7 @@
 {
   "config": {
       "anonymize_bids": true,
-      "bids_sidecar": "n",
+      "bids_sidecar": "y",
       "coil_combine": false,
       "compress_nifti": "y",
       "compression_level": 6,

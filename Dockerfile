@@ -50,20 +50,18 @@ RUN chmod +x ${FLYWHEEL}/fix_dcm_vols.py
 
 # copy in scripts
 COPY manifest.json ${FLYWHEEL}/manifest.json
-COPY arrange.py \
-     dcm2niix.py \
-     metadata.py \
-     pydeface.py \
-     resolve.py \
-     run.py \
-     utils.py ${FLYWHEEL}/
+ADD dcm2niix ${FLYWHEEL}/dcm2niix
+ADD pydeface ${FLYWHEEL}/pydeface
+ADD utils ${FLYWHEEL}/utils
+COPY run.py ${FLYWHEEL}/run.py
 RUN chmod +x ${FLYWHEEL}/run.py
 
 # FIX: replicate Flywheel for testing
 COPY config.json ${FLYWHEEL}/config.json
+ADD tests ${FLYWHEEL}/tests
 RUN mkdir -p ${FLYWHEEL}/input
 RUN mkdir -p ${FLYWHEEL}/output
-COPY assets/aliza_siemens_trio.zip ${FLYWHEEL}/input/aliza_siemens_trio.zip
+COPY tests/assets/aliza_siemens_trio.zip ${FLYWHEEL}/input/aliza_siemens_trio.zip
 
 # set the entrypoint
 # ENTRYPOINT ["python3 run.py"]
