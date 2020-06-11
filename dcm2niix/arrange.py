@@ -14,7 +14,7 @@ import nibabel as nb
 log = logging.getLogger(__name__)
 
 
-def prepare_dcm2niix_input(infile, rec_infile=None, work_dir):
+def prepare_dcm2niix_input(infile, rec_infile, work_dir):
     """Prepare dcm2niix input directory.
 
         The input can be a zip archive (.zip), a compressed tar archive (.tgz), or a
@@ -24,7 +24,7 @@ def prepare_dcm2niix_input(infile, rec_infile=None, work_dir):
     Args:
         infile (str): The absolute path to the input file.
         rec_infile (str): The absolute path to the rec file for a par/rec file pair;
-            note, the infile input must be a valid par file. Optional.
+            note, the infile input must be a valid par file.
         work_dir (str): The absolute path to the working directory where the output
             directory is created.
 

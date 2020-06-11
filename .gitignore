@@ -1,7 +1,7 @@
 TODO.txt
 fix_dcm_vols.py
+config.json
 .DS_Store
 dcm2niix/.DS_Store
 pydeface/.DS_Store
 utils/.DS_Store
-
