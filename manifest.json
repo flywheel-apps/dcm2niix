@@ -1,13 +1,13 @@
 {
   "name": "dcm2niix",
-  "label": "DICOM to NIfTI conversion using dcm2niix with optional implementation of pydeface.",
-  "description": "Implementation of Chris Rorden's dcm2niix for converting DICOM to NIfTI, with optional implementation of Poldrack Lab's pydeface to remove facial structures from NIfTI.",
+  "label": "DICOM to NIfTI conversion using dcm2niix with optional implementation of PyDeface.",
+  "description": "Implementation of Chris Rorden's dcm2niix for converting DICOM to NIfTI, with optional implementation of Poldrack Lab's PyDeface to remove facial structures from NIfTI.",
   "version": "0.0.1-dev",
   "author": "Flywheel",
   "maintainer": "Flywheel <support@flywheel.io>",
   "license": "Other",
   "source": "https://github.com/rordenlab/dcm2niix & https://github.com/poldracklab/pydeface",
-  "cite": "dcm2niix doi: 10.1016/j.jneumeth.2016.03.001 & pydeface doi: 10.5281/zenodo.3524401",
+  "cite": "dcm2niix doi: 10.1016/j.jneumeth.2016.03.001 & PyDeface doi: 10.5281/zenodo.3524401",
   "custom": {
       "gear-builder": {
           "category": "converter",
@@ -42,7 +42,7 @@
       },
       "pydeface_template": {
           "base": "file",
-          "description": "If implementing pydeface, optional template image that will be used as the registration target instead of the default.",
+          "description": "If implementing PyDeface, optional template image that will be used as the registration target instead of the default.",
           "optional": true,
           "type": {
               "enum": [
@@ -52,7 +52,7 @@
       },
       "pydeface_facemask": {
           "base": "file",
-          "description": "If implementing pydeface, optional face mask image that will be used instead of the default.",
+          "description": "If implementing PyDeface, optional face mask image that will be used instead of the default.",
           "optional": true,
           "type": {
               "enum": [
@@ -70,7 +70,12 @@
       "bids_sidecar": {
           "description": "Output BIDS sidecar in JSON format. Options are 'y'=yes, 'n'=no (default), 'o'=only (whereby no NIfTI file will be generated).",
           "type": "string",
-          "default": "n"
+          "default": "y",
+          "enum": [
+              "y",
+              "n",
+              "o"
+          ]
       },
       "coil_combine": {
           "description": "For sequences with individual coil data, saved as individual volumes, this option will save a NIfTI file with ONLY the combined coil data (i.e., the last volume). Options: true, false (default). WARNING: Expert Option. We make no effort to check for independent coil data, we simply trust that if you have selcted this option you know what you are asking for.",
@@ -80,7 +85,12 @@
       "compress_nifti": {
           "description": "Compress output NIfTI file. Options: 'y'=yes (default), 'n'=no, '3'=no,3D. If option '3' is chosen, the filename flag will be set to '-f %p_%s' to prevent overwriting files.",
           "type": "string",
-          "default": "y"
+          "default": "y",
+          "enum": [
+              "y",
+              "n",
+              "3"
+          ]
       },
       "compression_level": {
           "description": "Set the gz compression level. Options: 1 (fastest) to 9 (smallest), 6 (default).",
@@ -135,12 +145,12 @@
           "default": true
       },
       "pydeface": {
-          "description": "Implement pydeface to remove facial structures from NIfTI. Only defaced NIfTIs will be included in the output. Options: true, false (default).",
+          "description": "Implement PyDeface to remove facial structures from NIfTI. Only defaced NIfTIs will be included in the output. Options: true, false (default).",
           "type": "boolean",
           "default": false
       },
       "pydeface_cost": {
-          "description": "If implementing pydeface, the FSL-Flirt cost function. Options: 'mutualinfo' (default), 'corratio', 'normcorr', 'normal', 'leastsq', 'labeldiff', 'bbr'.",
+          "description": "If implementing PyDeface, the FSL-Flirt cost function. Options: 'mutualinfo' (default), 'corratio', 'normcorr', 'normal', 'leastsq', 'labeldiff', 'bbr'.",
           "type": "string",
           "default": "mutualinfo",
           "enum": [
@@ -154,12 +164,12 @@
           ]
       },
       "pydeface_nocleanup": {
-          "description": "If implementing pydeface, do not clean up temporary files. Options: true, false (default).",
+          "description": "If implementing PyDeface, do not clean up temporary files. Options: true, false (default).",
           "type": "boolean",
           "default": false
       },
       "pydeface_verbose": {
-          "description": "If implementing pydeface, show additional status prints. Options: true, false (default).",
+          "description": "If implementing PyDeface, show additional status prints. Options: true, false (default).",
           "type": "boolean",
           "default": false
       },

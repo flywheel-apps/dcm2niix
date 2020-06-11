@@ -11,11 +11,8 @@ from pydeface import pydeface_run
 from utils import parse_config, resolve
 
 
-logfile = "/flywheel/v0/output/logfile.log"
 FORMAT = "[%(asctime)s - %(levelname)s - %(name)s:%(lineno)d] %(message)s"
-logging.basicConfig(
-    filename=logfile, level=logging.INFO, format=FORMAT, datefmt="%Y-%m-%d"
-)
+logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt="%Y-%m-%d")
 log = logging.getLogger()
 
 
