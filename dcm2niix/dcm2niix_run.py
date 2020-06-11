@@ -32,35 +32,37 @@ def convert_directory(
     """Run dcm2niix.
 
     Args:
-        source_dir (str): the absolute path to the output directory containing
+        source_dir (str): The absolute path to the output directory containing
             the files from the input(s).
-        output_dir (str): absolute path to the output directory to place the
+        output_dir (str): The absolute path to the output directory to place the
             converted results.
-        anonymize_bids (bool): if True, anonymize sidecar.
-        bids_sidecar (str): output sidecar; 'y'=yes, 'n'=no, 'o'=only
+        anonymize_bids (bool): If rrue, anonymize sidecar.
+        bids_sidecar (str): Output sidecar; 'y'=yes, 'n'=no, 'o'=only
             (whereby no NIfTI file will be generated).
-        compress_nifti (str): compress output NIfTI file; 'y'=yes, 'n'=no, '3'=no,3D.
+        compress_nifti (str): Compress output NIfTI file; 'y'=yes, 'n'=no, '3'=no,3D.
             If option '3' is chosen, the filename flag will be set to '-f %p_%s'
             to prevent overwriting files.
-        compression_level (int): set the gz compression level: 1 (fastest) to 9 (smallest)
-        convert_only_series (str): space-separated list of series numbers to convert or
+        compression_level (int): Set the gz compression level: 1 (fastest) to
+            9 (smallest).
+        convert_only_series (str): Space-separated list of series numbers to convert or
             default 'all'. WARNING: Expert Option.
-        crop (bool): if true, crop 3D T1 images.
-        filename (str): output filename template for dcm2niix command.
-        ignore_derived (bool): if true, ignore derived, localizer, and 2D images.
-        ignore_errors (bool): if true, ignore dcm2niix errors and exit status,
+        crop (bool): If true, crop 3D T1 images.
+        filename (str): Output filename template for dcm2niix command.
+        ignore_derived (bool): If true, ignore derived, localizer, and 2D images.
+        ignore_errors (bool): If true, ignore dcm2niix errors and exit status,
             and preserve outputs.
-        lossless_scaling (bool): if true, losslessly scale 16-bit integers
+        lossless_scaling (bool): If true, losslessly scale 16-bit integers
             to use dynamic range.
-        merge2d (bool): if true, merge 2D slices from same series.
-        philips_scaling (bool): if true, Philips precise float (not display) scaling.
-        single_file_mode (bool): if true, single file mode, do not convert other
+        merge2d (bool): If true, merge 2D slices from same series.
+        philips_scaling (bool): If true, Philips precise float (not display) scaling.
+        single_file_mode (bool): If true, single file mode, do not convert other
             images in folder.
-        text_notes_private (bool): if true, retain text notes including
+        text_notes_private (bool): If true, retain text notes including
             private patient details.
 
     Returns:
-        output (nipype.interfaces.base.support.InterfaceResult): dcm2niix output results.
+        output (nipype.interfaces.base.support.InterfaceResult): The dcm2niix
+            output results.
 
     """
     try:
@@ -85,7 +87,7 @@ def convert_directory(
         # dcm2niix command configurations for filename and compression
         if compress_nifti == "3":
             log.info(
-                f"Outputs will be saved as uncompressed 3D volumes. \
+                "Outputs will be saved as uncompressed 3D volumes. \
                        \nFilename will be set to %p_%s to prevent overwritting files."
             )
             filename = "%p_%s"
@@ -102,7 +104,7 @@ def convert_directory(
 
         converter.inputs.out_filename = filename
 
-        # additional dcm2niix command configurations
+        # Additional dcm2niix command configurations
         converter.inputs.crop = crop
         converter.inputs.has_private = text_notes_private
         converter.inputs.ignore_deriv = ignore_derived
@@ -115,24 +117,24 @@ def convert_directory(
 
         if convert_only_series != "all":
             log.info("WARNING: Using an Expert Option.")
+            # See: https://www.nitrc.org/forum/forum.php?thread_id=11134&forum_id=4703
             converter.inputs.series_numbers = convert_only_series
 
-        # log the dcm2niix command configuration and run
+        # Log the dcm2niix command configuration and run
         log.info(f"Command to be executed: \n\n{converter.cmdline}\n")
         output = converter.run()
 
-        log.info("Output from dcm2niix ...")
-        log.info(f"\n\n{output.runtime.stdout }\n")
+        log.info(f"Output from dcm2niix: \n\n{output.runtime.stdout }\n")
 
-        # if error from dcm2niix software, then raise exception
+        # If error from dcm2niix software, then raise exception
         if output.runtime.returncode == 1:
             raise Exception("The dcm2niix software pacakage returned an error.")
         else:
-            log.info("Finished dcm2niix conversion.\n")
+            log.info("Finished dcm2niix conversion.")
 
     except Exception as e:
 
-        log.error(f"Did not complete dcm2niix conversion. Exiting.")
+        log.error("Did not complete dcm2niix conversion. Exiting.")
         log.exception(e, exc_info=False)
         output = None
 
