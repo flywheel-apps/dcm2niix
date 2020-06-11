@@ -70,7 +70,7 @@ def test_PrepareDcm2niixInput_ZipArchive_CatchNestedInputError():
 
     tmp_dir = "assets/tmp"
     shutil.os.mkdir(tmp_dir)
-    infile = f"assets/dicom_nested_error.zip"
+    infile = "assets/dicom_nested_error.zip"
 
     with pytest.raises(SystemExit) as exception:
         arrange.prepare_dcm2niix_input(infile, False, tmp_dir)
@@ -104,7 +104,7 @@ def test_PrepareDcm2niixInput_TarArchive_CatchNestedInputError():
 
     tmp_dir = "assets/tmp"
     shutil.os.mkdir(tmp_dir)
-    infile = f"assets/dicom_nested_error.tgz"
+    infile = "assets/dicom_nested_error.tgz"
 
     with pytest.raises(SystemExit) as exception:
         arrange.prepare_dcm2niix_input(infile, False, tmp_dir)
@@ -122,7 +122,7 @@ def test_PrepareDcm2niixInput_ParRecSolo_MatchValidDataset():
     rec_infile = "assets/parrec_solo.REC"
 
     arrange.prepare_dcm2niix_input(infile, rec_infile, tmp_dir)
-    valid_dir = f"assets/valid_dataset/parrec_solo"
+    valid_dir = "assets/valid_dataset/parrec_solo"
     out = filecmp.dircmp(tmp_dir, valid_dir)
 
     assert out.left_only == []

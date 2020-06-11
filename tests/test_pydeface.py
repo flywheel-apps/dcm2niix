@@ -21,7 +21,7 @@ def test_RunPydeface_WithInfile_Match():
     test_image = nb.load(test_file).get_data()
     outcome = np.array_equal(valid_image, test_image)
 
-    assert outcome == True
+    assert outcome is True
 
     os.remove(test_file)
 
@@ -39,7 +39,7 @@ def test_RunPydeface_WithTemplate_Match():
     test_image = nb.load(test_file).get_data()
     outcome = np.array_equal(valid_image, test_image)
 
-    assert outcome == True
+    assert outcome is True
 
     os.remove(test_file)
 
@@ -57,7 +57,7 @@ def test_RunPydeface_WithFacemask_Match():
     test_image = nb.load(test_file).get_data()
     outcome = np.array_equal(valid_image, test_image)
 
-    assert outcome == True
+    assert outcome is True
 
     os.remove(test_file)
 
@@ -83,7 +83,7 @@ def test_RunPydeface_WithAllOptions_Match():
 
     outcome = np.array_equal(valid_image, test_image)
 
-    assert outcome == True
+    assert outcome is True
 
     os.remove(test_file)
     os.remove("assets/pydeface_T1_test_pydeface_mask.nii.gz")
