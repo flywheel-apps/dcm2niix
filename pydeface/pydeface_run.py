@@ -1,4 +1,4 @@
-"""Functions to implement pydeface."""
+"""Functions to execute PyDeface on a list of NIfTI files or a single NIfTI file."""
 
 import logging
 import os
@@ -16,21 +16,21 @@ def deface_multiple_niftis(
     pydeface_nocleanup=False,
     pydeface_verbose=False,
 ):
-    """Run pydeface on a set of nifti files.
+    """Run PyDeface on a list of NIfTI files.
 
      Args:
-        nifti_files (list): paths to nifti files to generate coil combined data for.
+        nifti_files (list): The paths to NIfTI files to generate coil combined data for.
         pydeface_cost (str): FSL-Flirt cost function. Options: 'mutualinfo' (default),
             'corratio', 'normcorr', 'normal', 'leastsq', 'labeldiff', 'bbr'.
-        template (str): the absolute path to an optional template image that will be used
-            as the registration target instead of the default
-        facemask (str): the absolute path to an optional faskmask image that will be used
-            instead of the default.
-        pydeface_nocleanup (bool): if True, do not clean up temporary files.
-        pydeface_verbose (bool): if True, show additional status prints.
+        template (str): The absolute path to an optional template image that will be
+            used as the registration target instead of the default.
+        facemask (str): The absolute path to an optional faskmask image that will be
+            used instead of the default.
+        pydeface_nocleanup (bool): If true, do not clean up temporary files.
+        pydeface_verbose (bool): If true, show additional status prints.
 
     Returns:
-        None, but replaces each input nifti with a defaced version.
+        None; replaces input NIfTI with defaced version.
 
     """
     for file in nifti_files:
@@ -52,24 +52,24 @@ def deface_single_nifti(
     pydeface_nocleanup=False,
     pydeface_verbose=False,
 ):
-    """Run pydeface on a single nifti file.
+    """Run PyDeface on a single of NIfTI file.
 
      Args:
-        infile (str): the absolute path to the input file.
+        infile (str): The absolute path to the input NIfTI file.
         pydeface_cost (str): FSL-Flirt cost function. Options: 'mutualinfo' (default),
             'corratio', 'normcorr', 'normal', 'leastsq', 'labeldiff', 'bbr'.
-        template (str): the absolute path to an optional template image that will be used
-            as the registration target instead of the default
-        facemask (str): the absolute path to an optional faskmask image that will be used
-            instead of the default.
-        pydeface_nocleanup (bool): if True, do not clean up temporary files.
-        pydeface_verbose (bool): if True, show additional status prints.
+        template (str): The absolute path to an optional template image that will be
+            used as the registration target instead of the default.
+        facemask (str): The absolute path to an optional faskmask image that will be
+            used instead of the default.
+        pydeface_nocleanup (bool): If true, do not clean up temporary files.
+        pydeface_verbose (bool): If true, show additional status prints.
 
     Returns:
-        None, but replaces input nifti with defaced version.
+        None; replaces input NIfTI with defaced version.
 
     """
-    log.info(f"Running pydeface on {infile}")
+    log.info(f"Running PyDeface on {infile}")
 
     command = ["pydeface"]
 
@@ -106,15 +106,14 @@ def deface_single_nifti(
             universal_newlines=True,
         )
 
-        log.info("Output from pydeface ...")
-        log.info("\n\n" + process.stdout.read())
+        log.info(f"Output from PyDeface: \n\n{process.stdout.read()}")
 
         if process.wait() != 0:
-            log.error("Error defacing nifti using pydeface. Exiting.")
+            log.error("Error defacing nifti using PyDeface. Exiting.")
             os.sys.exit(1)
 
     except FileNotFoundError:
-        log.exception("pydeface unable to be found as executable. Exiting.")
+        log.exception("PyDeface unable to be found as executable. Exiting.")
         os.sys.exit(1)
 
-    log.info(f"Success. Pydeface completed on {infile}.")
+    log.info(f"Success. PyDeface completed on {infile}.")

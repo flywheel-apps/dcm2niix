@@ -1,3 +1,5 @@
+"""Function to resolve dcm2niix gear outputs."""
+
 import glob
 import logging
 import os
@@ -25,23 +27,24 @@ def setup(
     """Orchestrate resolution of gear, including metadata capture and file retention.
 
     Args:
-        nifti_files (list): absolute paths to nifti files to resolve.
-        work_dir (str): absolute path to the output directory of dcm2niix and where the
-            metadata file generated is written to.
-        dcm2niix_input_dir (str): absolute path to a set of dicoms as input to dcm2niix.
-        retain_sidecar (bool): if True, sidecar is retained in final output.
-        retain_nifti (bool): if True, nifti is retained in final output.
-        pydeface_intermediaries (bool): if True, pydeface intermediary files are retained.
-            The files when --nocleanup flag is applied to the pydeface command.
-        classification (list): file classification, typically from gear config
-        modality (str): file modality, typically from gear config
+        nifti_files (list): The absolute paths to NIfTI files to resolve.
+        work_dir (str): The absolute path to the output directory of dcm2niix and where
+            the metadata file generated is written to.
+        dcm2niix_input_dir (str): The absolute path to the input directory to dcm2niix.
+        retain_sidecar (bool): If true, sidecar is retained in final output.
+        retain_nifti (bool): If true, NIfTI is retained in final output.
+        pydeface_intermediaries (bool): If true, PyDeface intermediary files are
+            retained. The files created when --nocleanup flag is applied to the
+            PyDeface command.
+        classification (list): File classification, typically from gear config.
+        modality (str): File modality, typically from gear config.
 
     Returns:
         None
 
     """
-    # ignoring errors configuration option; move all files from work_dir to output_dir
-    if (ignore_errors == True) and (nifti_files == None):
+    # Ignoring errors configuration option; move all files from work_dir to output_dir
+    if (ignore_errors is True) and (nifti_files is None):
         log.info("Retaining gear outputs. WARNING: Using an Expert Option.")
         work_dir_contents = glob.glob(work_dir + "/*")
 
@@ -49,8 +52,7 @@ def setup(
             if not os.path.isdir(item):
                 shutil.move(item, output_dir)
 
-    # capture metadata
-    # TODO: test with PAR/REC files
+    # Capture metadata
     metadata_file = metadata.generate(
         nifti_files,
         work_dir,
@@ -62,7 +64,7 @@ def setup(
         modality=modality,
     )
 
-    # retain gear outputs
+    # Retain gear outputs
     retain_gear_outputs(
         nifti_files,
         metadata_file,
@@ -86,15 +88,16 @@ def retain_gear_outputs(
     """Move selected gear outputs to the output directory.
 
     Args:
-        nifti_files (list): absolute paths to nifti files to resolve.
-        metadata_file (str): absolute path to the metadata file.
-        work_dir (str): absolute path to the output directory of dcm2niix and where the
-            generated metadata file is.
-        output_dir (str): absolute path to the gear output directory.
-        retain_sidecar (bool): if True, sidecar is retained in final output.
-        retain_nifti (bool): if True, nifti is retained in final output.
-        pydeface_intermediaries (bool): if True, pydeface intermediary files are retained.
-            The files when --nocleanup flag is applied to the pydeface command.
+        nifti_files (list): The absolute paths to NIfTI files to resolve.
+        metadata_file (str): The absolute path to the metadata file.
+        work_dir (str): The absolute path to the output directory of dcm2niix and
+            where the generated metadata file is.
+        output_dir (str): The absolute path to the gear output directory.
+        retain_sidecar (bool): If true, sidecar is retained in final output.
+        retain_nifti (bool): If true, NIfTI is retained in final output.
+        pydeface_intermediaries (bool): If true, pydeface intermediary files are
+            retained. The files created when --nocleanup flag is applied to the
+            pydeface command.
 
     Returns:
         None
@@ -104,37 +107,37 @@ def retain_gear_outputs(
 
     for file in nifti_files:
 
-        # move bids json sidecar file, if indicated
+        # Move bids json sidecar file, if indicated
         if retain_sidecar:
             bids_sidecar = os.path.join(
                 work_dir, re.sub(r"(\.nii\.gz|\.nii)", ".json", os.path.basename(file))
             )
             shutil.move(bids_sidecar, output_dir)
 
-        # move niftis and associated files (.bval, .bvec, .mat), if indicated
+        # Move niftis and associated files (.bval, .bvec, .mat), if indicated
         if retain_nifti:
 
-            # move nifti file
+            # Move nifti file
             shutil.move(file, output_dir)
 
-            # move bval file, if exists
+            # Move bval file, if exists
             bval = os.path.join(
                 work_dir, re.sub(r"(\.nii\.gz|\.nii)", ".bval", os.path.basename(file))
             )
             if os.path.isfile(bval):
                 shutil.move(bval, output_dir)
 
-            # move bvec file, if exists
+            # Move bvec file, if exists
             bvec = os.path.join(
                 work_dir, re.sub(r"(\.nii\.gz|\.nii)", ".bvec", os.path.basename(file))
             )
             if os.path.isfile(bvec):
                 shutil.move(bvec, output_dir)
 
-            # move pydeface intermediary files, if exists
+            # Move pydeface intermediary files, if exists
             if pydeface_intermediaries:
 
-                # ??? is output of pydefaced always compressed nifti?
+                # The output mask of PyDeface is a compressed nifti, even if .nii input
                 pydeface_mask = os.path.join(
                     work_dir,
                     re.sub(
@@ -155,9 +158,9 @@ def retain_gear_outputs(
                 )
 
                 if os.path.isfile(pydeface_matlab):
-                    shutil.move(bvec, output_dir)
+                    shutil.move(pydeface_matlab, output_dir)
 
-    # move metadata file
+    # Move metadata file
     shutil.move(metadata_file, output_dir)
 
     log.info("Gear outputs resolved.")
