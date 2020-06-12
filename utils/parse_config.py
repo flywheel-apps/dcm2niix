@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 
 def generate_gear_args(gear_context, FLAG):
     """Generate gear arguments for different stages indicated by the FLAG."""
-    log.info(f"{42*'8'}")
+    log.info(f"\n{42*'8'}")
     log.info(f"Preparing arguments for gear stage >> {FLAG}.")
 
     if FLAG == "prepare":

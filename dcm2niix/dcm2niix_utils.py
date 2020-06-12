@@ -39,8 +39,7 @@ def remove_incomplete_volumes(dcm2niix_input_dir):
 
     with process.stdout:
         log.info(
-                "Output from incomplete volume correction:"
-                f"\n\n{process.stdout.read()}\n"
+            "Output from incomplete volume correction:" f"\n\n{process.stdout.read()}\n"
         )
 
     if process.wait() != 0:
@@ -63,8 +62,8 @@ def remove_incomplete_volumes(dcm2niix_input_dir):
 
             if len(subdirs) != 2:
                 log.error(
-                         "Output from incomplete volume removal script is unexpected. "
-                         "Exiting."
+                    "Output from incomplete volume removal script is unexpected. "
+                    "Exiting."
                 )
                 os.sys.exit(1)
 

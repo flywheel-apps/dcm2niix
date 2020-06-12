@@ -230,7 +230,7 @@ def strip_prefix_ziparchive(zipObj, prefix):
             and os.path.splitext(zipinfo.filename)[0] != prefix
         ):
 
-            zipinfo.filename = zipinfo.filename[len(prefix):]
+            zipinfo.filename = zipinfo.filename[len(prefix) :]
 
         # Only return files
         if not zipinfo.is_dir():
@@ -247,7 +247,7 @@ def strip_prefix_tararchive(tarObj, prefix):
             and os.path.splitext(tarinfo.path)[0] != prefix
         ):
 
-            tarinfo.path = tarinfo.path[len(prefix)+1:]
+            tarinfo.path = tarinfo.path[len(prefix) + 1 :]
 
         # Only return files
         if tarinfo.isreg():

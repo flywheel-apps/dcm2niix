@@ -20,7 +20,7 @@ A [Flywheel Gear](https://github.com/flywheel-io/gears/tree/master/spec) for imp
 
 #### dcm2niix
 * **anonymize_bids**: Anonymize BIDS. Options: true (default), false. 'bids_sidecar' config option must be enabled (i.e., 'y' or 'o' options).
-* **bids_sidecar**: Output BIDS sidecar in JSON format. Options are 'y'=yes, 'n'=no (default), 'o'=only (whereby no NIfTI file will be generated).
+* **bids_sidecar**: Output BIDS sidecar in JSON format. Options are 'y'=yes (default), 'n'=no, 'o'=only (whereby no NIfTI file will be generated).
 * **compress_nifti**: Compress output NIfTI file. Options: 'y'=yes (default), 'n'=no, '3'=no,3D. If option '3' is chosen, the filename flag will be set to '-f %p_%s' to prevent overwriting files.
 * **compression_level**: Set the gz compression level. Options: 1 (fastest) to 9 (smallest), 6 (default).
 * **convert_only_series**: Selectively convert by series number - can be used up to 16 times. Options: 'all' (default), space-separated list of series numbers (e.g., '2 12 20'). WARNING: Expert Option. We trust that if you have selcted this option you know what you are asking for.

@@ -51,6 +51,7 @@ def setup(
         for item in work_dir_contents:
             if not os.path.isdir(item):
                 shutil.move(item, output_dir)
+                log.info(f"Moving {item} to output directory for upload to Flywheel.")
 
     # Capture metadata
     metadata_file = metadata.generate(
@@ -113,12 +114,12 @@ def retain_gear_outputs(
                 work_dir, re.sub(r"(\.nii\.gz|\.nii)", ".json", os.path.basename(file))
             )
             shutil.move(bids_sidecar, output_dir)
+            log.info(
+                f"Moving {bids_sidecar} to output directory for upload to Flywheel."
+            )
 
         # Move niftis and associated files (.bval, .bvec, .mat), if indicated
         if retain_nifti:
-
-            # Move nifti file
-            shutil.move(file, output_dir)
 
             # Move bval file, if exists
             bval = os.path.join(
@@ -126,6 +127,7 @@ def retain_gear_outputs(
             )
             if os.path.isfile(bval):
                 shutil.move(bval, output_dir)
+                log.info(f"Moving {bval} to output directory for upload to Flywheel.")
 
             # Move bvec file, if exists
             bvec = os.path.join(
@@ -133,6 +135,7 @@ def retain_gear_outputs(
             )
             if os.path.isfile(bvec):
                 shutil.move(bvec, output_dir)
+                log.info(f"Moving {bvec} to output directory for upload to Flywheel.")
 
             # Move pydeface intermediary files, if exists
             if pydeface_intermediaries:
@@ -149,6 +152,9 @@ def retain_gear_outputs(
 
                 if os.path.isfile(pydeface_mask):
                     shutil.move(pydeface_mask, output_dir)
+                    log.info(
+                        f"Moving {pydeface_mask} to output directory for upload to Flywheel."
+                    )
 
                 pydeface_matlab = os.path.join(
                     work_dir,
@@ -159,8 +165,16 @@ def retain_gear_outputs(
 
                 if os.path.isfile(pydeface_matlab):
                     shutil.move(pydeface_matlab, output_dir)
+                    log.info(
+                        f"Moving {pydeface_matlab} to output directory for upload to Flywheel."
+                    )
+
+            # Move nifti file
+            shutil.move(file, output_dir)
+            log.info(f"Moving {file} to output directory for upload to Flywheel.")
 
     # Move metadata file
     shutil.move(metadata_file, output_dir)
+    log.info(f"Moving {metadata_file} to output directory for upload to Flywheel.")
 
     log.info("Gear outputs resolved.")
