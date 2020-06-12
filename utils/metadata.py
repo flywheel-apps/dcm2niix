@@ -1,10 +1,11 @@
 """Generate file metadata from dcm2niix output."""
 
-import glob
 import json
 import logging
 import os
+import pprint
 import re
+from pathlib import Path
 
 import pydicom
 from pydicom.filereader import InvalidDicomError
@@ -20,7 +21,7 @@ def generate(
     retain_sidecar=True,
     retain_nifti=True,
     pydeface_intermediaries=False,
-    classification=list(),
+    classification=None,
     modality=None,
 ):
     """Generate file metadata from dcm2niix output.
@@ -40,7 +41,7 @@ def generate(
         pydeface_intermediaries (bool): If True, pydeface intermediary files are
             retained. The files created when --nocleanup flag is applied to the
             pydeface command.
-        classification (list): File classification, typically from gear config.
+        classification (dict): File classification, typically from gear config.
         modality (str): File modality, typically from gear config.
 
     Returns:
@@ -51,12 +52,16 @@ def generate(
 
     capture_metadata = []
 
+    # fmt: off
     # Append metadata from dicom header and from the associated bids sidecar
     for file in nifti_files:
 
         # Capture the path to associated sidecar
         sidecar = os.path.join(
-            work_dir, re.sub(r"(\.nii\.gz|\.nii)", ".json", os.path.basename(file))
+                               work_dir, re.sub(
+                                                r"(\.nii\.gz|\.nii)",
+                                                ".json",
+                                                os.path.basename(file))
         )
 
         with open(sidecar) as sidecar_file:
@@ -78,7 +83,30 @@ def generate(
         # header, capture additional metadata.
         if dcm2niix_input_dir:
             log.info("Capturing additional metadata from DICOMs.")
-            dicoms = glob.glob(dcm2niix_input_dir + "/**", recursive=True)
+
+            dicom_metadata_keys = [
+                "AcquisitionDuration",
+                "NumberOfDynamics",
+                "FOV",
+                "SpacingBetweenSlices",
+                "PixelSpacing",
+                "Resolution",
+                "AcquisitionMatrix",
+                "NumberOfEchos",
+                "NumberOfSlices",
+                "PrepulseDelay",
+                "PrepulseType",
+                "SliceOrientation",
+                "ScanningTechnique",
+                "ScanType",
+            ]
+            dicom_data = dict.fromkeys(dicom_metadata_keys)
+
+            dicoms = [
+                path
+                for path in Path(dcm2niix_input_dir).rglob("*")
+                if not path.is_dir()
+            ]
 
             for dicom in dicoms:
 
@@ -95,32 +123,20 @@ def generate(
                     ):
 
                         dicom_data = dicom_metadata_extraction(dicom_header)
-                        break
+
+                        count_metadata = len(
+                            [v for v in dicom_data.values() if v is not None]
+                        )
+                        if count_metadata < 1:
+                            # No dicom header metadata found, go to next dicom file
+                            continue
+                        else:
+                            # Dicom header metadata found, leave loop
+                            break
 
                 except InvalidDicomError:
                     continue
 
-                except IsADirectoryError:
-                    continue
-
-                except AttributeError:
-                    continue
-
-                finally:
-                    dicom_metadata_keys = [
-                        "AcquisitionDuration",
-                        "NumberOfDynamics",
-                        "Resolution",
-                        "AcquisitionMatrix",
-                        "NumberOfEchos",
-                        "NumberOfSlices",
-                        "PrepulseDelay",
-                        "PrepulseType",
-                        "SliceOrientation",
-                        "ScanningTechnique",
-                        "ScanType",
-                    ]
-                    dicom_data = dict.fromkeys(dicom_metadata_keys)
         else:
             log.info("Unable to capture additional metadata from DICOMs.")
             dicom_data = {}
@@ -131,33 +147,55 @@ def generate(
         # Apply collated metadata to all associated files
         if retain_sidecar:
             filedata = create_file_metadata(
-                sidecar, "source code", classification, metadata, modality
+                                            sidecar,
+                                            "source code",
+                                            classification,
+                                            metadata,
+                                            modality
             )
             capture_metadata.append(filedata)
 
         if retain_nifti:
             filedata = create_file_metadata(
-                file, "nifti", classification, metadata, modality
+                                            file,
+                                            "nifti",
+                                            classification,
+                                            metadata,
+                                            modality
             )
             capture_metadata.append(filedata)
 
             bval = os.path.join(
-                work_dir, re.sub(r"(\.nii\.gz|\.nii)", ".bval", os.path.basename(file))
+                                work_dir, re.sub(
+                                                 r"(\.nii\.gz|\.nii)",
+                                                 ".bval",
+                                                 os.path.basename(file))
             )
 
             if os.path.isfile(bval):
                 filedata = create_file_metadata(
-                    bval, "bval", classification, metadata, modality
+                                                bval,
+                                                "bval",
+                                                classification,
+                                                metadata,
+                                                modality
                 )
                 capture_metadata.append(filedata)
 
             bvec = os.path.join(
-                work_dir, re.sub(r"(\.nii\.gz|\.nii)", ".bvec", os.path.basename(file))
+                                work_dir, re.sub(
+                                                 r"(\.nii\.gz|\.nii)",
+                                                 ".bvec",
+                                                 os.path.basename(file))
             )
 
             if os.path.isfile(bvec):
                 filedata = create_file_metadata(
-                    bvec, "bvec", classification, metadata, modality
+                                                bvec,
+                                                "bvec",
+                                                classification,
+                                                metadata,
+                                                modality
                 )
                 capture_metadata.append(filedata)
 
@@ -165,37 +203,40 @@ def generate(
 
                 # The output mask of PyDeface is a compressed nifti, even if .nii input
                 pydeface_mask = os.path.join(
-                    work_dir,
-                    re.sub(
-                        r"(\.nii\.gz|\.nii)",
-                        "_pydeface_mask.nii.gz",
-                        os.path.basename(file),
-                    ),
+                                             work_dir, re.sub(
+                                                              r"(\.nii\.gz|\.nii)",
+                                                              "_pydeface_mask.nii.gz",
+                                                              os.path.basename(file))
                 )
 
                 if os.path.isfile(pydeface_mask):
                     filedata = create_file_metadata(
-                        pydeface_mask, "nifti", classification, metadata, modality
+                                                    pydeface_mask,
+                                                    "nifti",
+                                                    classification,
+                                                    metadata,
+                                                    modality
                     )
                     capture_metadata.append(filedata)
 
                 pydeface_matlab = os.path.join(
-                    work_dir,
-                    re.sub(
-                        r"(\.nii\.gz|\.nii)", "_pydeface.mat", os.path.basename(file)
-                    ),
+                                               work_dir, re.sub(
+                                                                r"(\.nii\.gz|\.nii)",
+                                                                "_pydeface.mat",
+                                                                os.path.basename(file))
                 )
 
                 if os.path.isfile(pydeface_matlab):
                     filedata = create_file_metadata(
-                        pydeface_matlab,
-                        "MATLAB data",
-                        classification,
-                        metadata,
-                        modality,
+                                                    pydeface_matlab,
+                                                    "MATLAB data",
+                                                    classification,
+                                                    metadata,
+                                                    modality,
                     )
                     capture_metadata.append(filedata)
 
+    # fmt: on
     # Collate the metadata and write to file
     metadata = {}
     metadata["acquisition"] = {}
@@ -205,49 +246,115 @@ def generate(
         json.dump(metadata, fObj)
 
     log.info("Metadata generation completed successfully.")
+    metadata_formatted = pprint.pformat(metadata)
+    log.info(f"Metadata contents: \n\n{metadata_formatted}\n")
 
     return metadata_file
 
 
 def dicom_metadata_extraction(dicom_header):
-    """Extract metadata from a dicom file header."""
+    """Extract metadata from a dicom file header.
+
+    Args:
+        dicom_header (pydicom.dataset.FileDataset): A PyDicom header of a DICOM file.
+
+    Returns:
+        dicom_data (dict): Extracted dicom headers with their values.
+
+    """
     dicom_data = {}
 
     # The time in seconds needed to run the prescribed pulse sequence
-    # DICOM tag (0018,9073)
-    dicom_data["AcquisitionDuration"] = dicom_header.AcquisitionDuration
+    try:
+        dicom_data["AcquisitionDuration"] = dicom_header.AcquisitionDuration
+    except AttributeError:
+        dicom_data["AcquisitionDuration"] = None
+
+    if dicom_data["AcquisitionDuration"] is None:
+
+        try:
+            dicom_data["AcquisitionDuration"] = dicom_header[0x0018, 0x9073].value
+        except (AttributeError, KeyError):
+            dicom_data["AcquisitionDuration"] = None
 
     # Number of dynamics is the number of temporal positions
-    dicom_data["NumberOfDynamics"] = dicom_header.NumberOfTemporalPositions
+    try:
+        dicom_data["NumberOfDynamics"] = dicom_header.NumberOfTemporalPositions
+    except AttributeError:
+        dicom_data["NumberOfDynamics"] = None
 
     # Calculate field of view
-    fov_x = round(dicom_header.PixelSpacing[0] * dicom_header.Columns)
-    fov_y = round(dicom_header.PixelSpacing[1] * dicom_header.Rows)
-    dicom_data["FOV"] = [fov_x, fov_y]
+    try:
+        fov_x = round(dicom_header.PixelSpacing[0] * dicom_header.Columns)
+        fov_y = round(dicom_header.PixelSpacing[1] * dicom_header.Rows)
+        dicom_data["FOV"] = [fov_x, fov_y]
+    except (AttributeError, IndexError):
+        dicom_data["FOV"] = None
 
-    dicom_data["Resolution"] = calculate_resolution(dicom_header)
+    try:
+        dicom_data["SpacingBetweenSlices"] = float(dicom_header.SpacingBetweenSlices)
+    except AttributeError:
+        dicom_data["SpacingBetweenSlices"] = None
 
-    dicom_data["AcquisitionMatrix"] = dicom_header.AcquisitionMatrix
+    try:
+        dicom_data["PixelSpacing"] = [
+            float(dicom_header.PixelSpacing[0]),
+            float(dicom_header.PixelSpacing[1]),
+        ]
+    except AttributeError:
+        dicom_data["PixelSpacing"] = None
 
-    dicom_data["NumberOfEchos"] = dicom_header[0x2001, 0x1014].value
+    try:
+        dicom_data["Resolution"] = calculate_resolution(dicom_header)
+    except AttributeError:
+        dicom_data["Resolution"] = None
 
-    dicom_data["NumberOfSlices"] = dicom_header[0x2001, 0x1018].value
+    try:
+        dicom_data["AcquisitionMatrix"] = dicom_header.AcquisitionMatrix
+    except AttributeError:
+        dicom_data["AcquisitionMatrix"] = None
 
-    dicom_data["PrepulseDelay"] = dicom_header[0x2001, 0x101B].value
+    try:
+        dicom_data["NumberOfEchos"] = dicom_header[0x2001, 0x1014].value
+    except (AttributeError, KeyError):
+        dicom_data["NumberOfEchos"] = None
 
-    dicom_data["PrepulseType"] = dicom_header[0x2001, 0x101C].value
+    try:
+        dicom_data["NumberOfSlices"] = dicom_header[0x2001, 0x1018].value
+    except (AttributeError, KeyError):
+        dicom_data["NumberOfSlices"] = None
 
-    dicom_data["SliceOrientation"] = dicom_header[0x2001, 0x100B].value
+    try:
+        dicom_data["PrepulseDelay"] = dicom_header[0x2001, 0x101B].value
+    except (AttributeError, KeyError):
+        dicom_data["PrepulseDelay"] = None
 
-    dicom_data["ScanningTechnique"] = dicom_header[0x2001, 0x1020].value
+    try:
+        dicom_data["PrepulseType"] = dicom_header[0x2001, 0x101C].value
+    except (AttributeError, KeyError):
+        dicom_data["PrepulseType"] = None
 
-    dicom_data["ScanType"] = dicom_header[0x2005, 0x10A1].value
+    try:
+        dicom_data["SliceOrientation"] = dicom_header[0x2001, 0x100B].value
+    except (AttributeError, KeyError):
+        dicom_data["SliceOrientation"] = None
+
+    try:
+        dicom_data["ScanningTechnique"] = dicom_header[0x2001, 0x1020].value
+    except (AttributeError, KeyError):
+        dicom_data["ScanningTechnique"] = None
+
+    try:
+        dicom_data["ScanType"] = dicom_header[0x2005, 0x10A1].value
+    except (AttributeError, KeyError):
+        dicom_data["ScanType"] = None
 
     return dicom_data
 
 
 def calculate_resolution(dicom_header):
     """Calculate the voxel resolution from a dicom file header."""
+    # See: https://neurostars.org/t/calculating-voxel-resolution-from-dicom-headers/7091
     try:
 
         fov_frequency = round(dicom_header.PixelSpacing[0] * dicom_header.Columns)
@@ -288,10 +395,10 @@ def calculate_resolution(dicom_header):
         resolution = [voxel_x, voxel_y, voxel_z]
 
     except AttributeError:
-        resolution = ["uk", "uk", "uk"]
+        resolution = None
 
     except ZeroDivisionError:
-        resolution = ["uk", "uk", "uk"]
+        resolution = None
 
     return resolution
 
@@ -299,7 +406,7 @@ def calculate_resolution(dicom_header):
 def create_file_metadata(filename, filetype, classification, bids_info, modality):
     """Create a dictionary storing the file metadata."""
     filedata = {}
-    filedata["name"] = filename
+    filedata["name"] = Path(filename).name
     filedata["type"] = filetype
     filedata["classification"] = classification
     filedata["info"] = bids_info

@@ -21,7 +21,7 @@ def setup(
     retain_sidecar=True,
     retain_nifti=True,
     pydeface_intermediaries=False,
-    classification=list(),
+    classification=None,
     modality=None,
 ):
     """Orchestrate resolution of gear, including metadata capture and file retention.
@@ -36,7 +36,7 @@ def setup(
         pydeface_intermediaries (bool): If true, PyDeface intermediary files are
             retained. The files created when --nocleanup flag is applied to the
             PyDeface command.
-        classification (list): File classification, typically from gear config.
+        classification (dict): File classification, typically from gear config.
         modality (str): File modality, typically from gear config.
 
     Returns:
@@ -105,76 +105,82 @@ def retain_gear_outputs(
 
     """
     log.info("Resolving gear outputs.")
+    # fmt: off
 
     for file in nifti_files:
 
         # Move bids json sidecar file, if indicated
         if retain_sidecar:
             bids_sidecar = os.path.join(
-                work_dir, re.sub(r"(\.nii\.gz|\.nii)", ".json", os.path.basename(file))
+                                        work_dir, re.sub(
+                                                         r"(\.nii\.gz|\.nii)",
+                                                         ".json",
+                                                         os.path.basename(file))
             )
+
             shutil.move(bids_sidecar, output_dir)
-            log.info(
-                f"Moving {bids_sidecar} to output directory for upload to Flywheel."
-            )
+            log.info(f"Moving {bids_sidecar} to output directory.")
 
         # Move niftis and associated files (.bval, .bvec, .mat), if indicated
         if retain_nifti:
 
             # Move bval file, if exists
             bval = os.path.join(
-                work_dir, re.sub(r"(\.nii\.gz|\.nii)", ".bval", os.path.basename(file))
+                                work_dir, re.sub(
+                                                 r"(\.nii\.gz|\.nii)",
+                                                 ".bval",
+                                                 os.path.basename(file))
             )
+
             if os.path.isfile(bval):
                 shutil.move(bval, output_dir)
-                log.info(f"Moving {bval} to output directory for upload to Flywheel.")
+                log.info(f"Moving {bval} to output directory.")
 
             # Move bvec file, if exists
             bvec = os.path.join(
-                work_dir, re.sub(r"(\.nii\.gz|\.nii)", ".bvec", os.path.basename(file))
+                                work_dir, re.sub(
+                                                 r"(\.nii\.gz|\.nii)",
+                                                 ".bvec",
+                                                 os.path.basename(file))
             )
+
             if os.path.isfile(bvec):
                 shutil.move(bvec, output_dir)
-                log.info(f"Moving {bvec} to output directory for upload to Flywheel.")
+                log.info(f"Moving {bvec} to output directory.")
 
             # Move pydeface intermediary files, if exists
             if pydeface_intermediaries:
 
                 # The output mask of PyDeface is a compressed nifti, even if .nii input
                 pydeface_mask = os.path.join(
-                    work_dir,
-                    re.sub(
-                        r"(\.nii\.gz|\.nii)",
-                        "_pydeface_mask.nii.gz",
-                        os.path.basename(file),
-                    ),
+                                             work_dir, re.sub(
+                                                              r"(\.nii\.gz|\.nii)",
+                                                              "_pydeface_mask.nii.gz",
+                                                              os.path.basename(file))
                 )
 
                 if os.path.isfile(pydeface_mask):
                     shutil.move(pydeface_mask, output_dir)
-                    log.info(
-                        f"Moving {pydeface_mask} to output directory for upload to Flywheel."
-                    )
+                    log.info(f"Moving {pydeface_mask} to output directory.")
 
                 pydeface_matlab = os.path.join(
-                    work_dir,
-                    re.sub(
-                        r"(\.nii\.gz|\.nii)", "_pydeface.mat", os.path.basename(file)
-                    ),
+                                               work_dir, re.sub(
+                                                                r"(\.nii\.gz|\.nii)",
+                                                                "_pydeface.mat",
+                                                                os.path.basename(file))
                 )
 
                 if os.path.isfile(pydeface_matlab):
                     shutil.move(pydeface_matlab, output_dir)
-                    log.info(
-                        f"Moving {pydeface_matlab} to output directory for upload to Flywheel."
-                    )
+                    log.info(f"Moving {pydeface_matlab} to output directory.")
 
             # Move nifti file
             shutil.move(file, output_dir)
-            log.info(f"Moving {file} to output directory for upload to Flywheel.")
+            log.info(f"Moving {file} to output directory.")
 
     # Move metadata file
     shutil.move(metadata_file, output_dir)
-    log.info(f"Moving {metadata_file} to output directory for upload to Flywheel.")
+    log.info(f"Moving {metadata_file} to output directory.")
 
+    # fmt: on
     log.info("Gear outputs resolved.")

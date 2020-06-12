@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 
 def generate_gear_args(gear_context, FLAG):
     """Generate gear arguments for different stages indicated by the FLAG."""
-    log.info(f"\n{42*'8'}")
+    log.info(f"{100*'8'}")
     log.info(f"Preparing arguments for gear stage >> {FLAG}.")
 
     if FLAG == "prepare":
@@ -84,7 +84,7 @@ def generate_gear_args(gear_context, FLAG):
             "retain_sidecar": True,
             "retain_nifti": True,
             "pydeface_intermediaries": False,
-            "classification": [],
+            "classification": None,
             "modality": None,
         }
 
@@ -114,6 +114,6 @@ def generate_gear_args(gear_context, FLAG):
             log.debug(e)
 
     gear_args_formatted = pprint.pformat(gear_args)
-    log.info(f"Prepared gear stage arguments: \n{gear_args_formatted}")
+    log.info(f"Prepared gear stage arguments: \n\n{gear_args_formatted}\n")
 
     return gear_args
