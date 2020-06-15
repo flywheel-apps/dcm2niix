@@ -79,6 +79,13 @@ def generate(
             elif not modality:
                 modality = "MR"
 
+        # Set proper empty classification dictionary if not provided as input
+        if not classification:
+            classification = {
+                              "Intent": [],
+                              "Measurement": []
+            }
+
         # Using the unique set of SeriesDescription and SeriesNumber from the DICOM
         # header, capture additional metadata.
         if dcm2niix_input_dir:
@@ -140,6 +147,9 @@ def generate(
         else:
             log.info("Unable to capture additional metadata from DICOMs.")
             dicom_data = {}
+
+        # Change None to empty string for final metadata
+        dicom_data = {k: ('' if v is None else v) for k, v in dicom_data.items()}
 
         # Collate metadata from dicom header and dcm2niix sidecar into one dictionary
         metadata = {**sidecar_info, **dicom_data}

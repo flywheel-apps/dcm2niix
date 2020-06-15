@@ -33,7 +33,7 @@ def prepare_dcm2niix_input(infile, rec_infile, work_dir):
             the files from the input(s).
 
     """
-    log.info("Prepare dcm2niix input.")
+    log.info("Arrange dcm2niix input.")
 
     if infile.endswith(".zip"):
 
