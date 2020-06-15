@@ -116,7 +116,9 @@ def convert_directory(
             converter.inputs.args = "-l y"
 
         if convert_only_series != "all":
-            log.info("WARNING: Using an Expert Option.")
+            log.warning(
+                "Expert Option (convert_only_series). We trust that if you have selected this option you know what you are asking for."
+            )
             # See: https://www.nitrc.org/forum/forum.php?thread_id=11134&forum_id=4703
             converter.inputs.series_numbers = convert_only_series
 

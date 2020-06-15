@@ -19,7 +19,7 @@ def prepare_dcm2niix_input(infile, rec_infile, work_dir):
 
         The input can be a zip archive (.zip), a compressed tar archive (.tgz), or a
         par/rec file pair. Input contents are placed in a single directory. The path to
-        this directory is the output.
+        this directory is the output of this function.
 
     Args:
         infile (str): The absolute path to the input file.

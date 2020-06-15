@@ -6,9 +6,12 @@ import os
 
 import flywheel
 
-from dcm2niix import prepare, dcm2niix_utils, dcm2niix_run
+from dcm2niix import prepare
+from dcm2niix import dcm2niix_utils
+from dcm2niix import dcm2niix_run
 from pydeface import pydeface_run
-from utils import parse_config, resolve
+from utils import parse_config
+from utils import resolve
 
 
 FORMAT = "[%(asctime)s - %(levelname)s - %(name)s:%(lineno)d] %(message)s"

@@ -74,13 +74,14 @@ def generate(
             # Retain the modality set in the config; otherwise, replace with sidecar
             # captured modality determined via dcm2niix and if neither modality set
             # in the config or sidecar, then set modality to MR.
-            if not modality and "Modality" in sidecar_info:
-                modality = sidecar_info["Modality"]
-            elif not modality:
-                modality = "MR"
+            if modality is None:
+                if "Modality" in sidecar_info:
+                    modality = sidecar_info["Modality"]
+                else:
+                    modality = "MR"
 
         # Set proper empty classification dictionary if not provided as input
-        if not classification:
+        if classification is None:
             classification = {
                               "Intent": [],
                               "Measurement": []
@@ -90,24 +91,6 @@ def generate(
         # header, capture additional metadata.
         if dcm2niix_input_dir:
             log.info("Capturing additional metadata from DICOMs.")
-
-            dicom_metadata_keys = [
-                "AcquisitionDuration",
-                "NumberOfDynamics",
-                "FOV",
-                "SpacingBetweenSlices",
-                "PixelSpacing",
-                "Resolution",
-                "AcquisitionMatrix",
-                "NumberOfEchos",
-                "NumberOfSlices",
-                "PrepulseDelay",
-                "PrepulseType",
-                "SliceOrientation",
-                "ScanningTechnique",
-                "ScanType",
-            ]
-            dicom_data = dict.fromkeys(dicom_metadata_keys)
 
             dicoms = [
                 path
@@ -148,8 +131,8 @@ def generate(
             log.info("Unable to capture additional metadata from DICOMs.")
             dicom_data = {}
 
-        # Change None to empty string for final metadata
-        dicom_data = {k: ('' if v is None else v) for k, v in dicom_data.items()}
+        # Remove metadata with None value
+        dicom_data = {k:v for k, v in dicom_data.items() if v is not None}
 
         # Collate metadata from dicom header and dcm2niix sidecar into one dictionary
         metadata = {**sidecar_info, **dicom_data}
@@ -398,9 +381,9 @@ def calculate_resolution(dicom_header):
         pixel_size_frequency = fov_frequency / acquisition_matrix_frequency
         pixel_size_phase = fov_phase / acquisition_matrix_phase
 
-        voxel_x = float("{:03.3f}".format(pixel_size_frequency))
-        voxel_y = float("{:03.3f}".format(pixel_size_phase))
-        voxel_z = float("{:03.3f}".format(dicom_header.SliceThickness))
+        voxel_x = f"{pixel_size_frequency:3.3f}"
+        voxel_y = f"{pixel_size_phase:3.3f}"
+        voxel_z = f"{dicom_header.SliceThickness:3.3f}"
 
         resolution = [voxel_x, voxel_y, voxel_z]
 

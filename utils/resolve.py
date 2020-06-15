@@ -45,36 +45,52 @@ def setup(
     """
     # Ignoring errors configuration option; move all files from work_dir to output_dir
     if (ignore_errors is True) and (nifti_files is None):
-        log.info("Retaining gear outputs. WARNING: Using an Expert Option.")
-        work_dir_contents = glob.glob(work_dir + "/*")
+        log.warning(
+            "Expert Option (ignore_errors). We trust that if you have selected this option you know what you are asking for."
+        )
 
+        # Capture metadata
+        metadata_file = metadata.generate(
+            nifti_files,
+            work_dir,
+            dcm2niix_input_dir,
+            retain_sidecar=True,
+            retain_nifti=True,
+            pydeface_intermediaries=pydeface_intermediaries,
+            classification=classification,
+            modality=modality,
+        )
+
+        work_dir_contents = glob.glob(work_dir + "/*")
         for item in work_dir_contents:
             if not os.path.isdir(item):
                 shutil.move(item, output_dir)
                 log.info(f"Moving {item} to output directory for upload to Flywheel.")
 
-    # Capture metadata
-    metadata_file = metadata.generate(
-        nifti_files,
-        work_dir,
-        dcm2niix_input_dir,
-        retain_sidecar=retain_sidecar,
-        retain_nifti=retain_nifti,
-        pydeface_intermediaries=pydeface_intermediaries,
-        classification=classification,
-        modality=modality,
-    )
+    else:
 
-    # Retain gear outputs
-    retain_gear_outputs(
-        nifti_files,
-        metadata_file,
-        work_dir,
-        output_dir,
-        retain_sidecar=retain_sidecar,
-        retain_nifti=retain_nifti,
-        pydeface_intermediaries=pydeface_intermediaries,
-    )
+        # Capture metadata
+        metadata_file = metadata.generate(
+            nifti_files,
+            work_dir,
+            dcm2niix_input_dir,
+            retain_sidecar=retain_sidecar,
+            retain_nifti=retain_nifti,
+            pydeface_intermediaries=pydeface_intermediaries,
+            classification=classification,
+            modality=modality,
+        )
+
+        # Retain gear outputs
+        retain_gear_outputs(
+            nifti_files,
+            metadata_file,
+            work_dir,
+            output_dir,
+            retain_sidecar=retain_sidecar,
+            retain_nifti=retain_nifti,
+            pydeface_intermediaries=pydeface_intermediaries,
+        )
 
 
 def retain_gear_outputs(

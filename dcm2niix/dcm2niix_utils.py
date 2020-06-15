@@ -154,6 +154,9 @@ def coil_combine(nifti_files):
         None; replaces the input nifti file with coil combined version.
 
     """
+    log.warning(
+        "Expert Option (coil_combine). We make no effort to check for independent coil data; we trust that you know what you are asking for if you have selected this option."
+    )
     for nifti_file in nifti_files:
 
         try:
