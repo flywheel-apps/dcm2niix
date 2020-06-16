@@ -44,22 +44,25 @@ def setup(
 
     """
     # Ignoring errors configuration option; move all files from work_dir to output_dir
-    if (ignore_errors is True) and (nifti_files is None):
+    if ignore_errors is True:
         log.warning(
-            "Expert Option (ignore_errors). We trust that if you have selected this option you know what you are asking for."
+            "Expert Option (ignore_errors). "
+            "We trust that since you have selected this option "
+            "you know what you are asking for. "
+            "Continuing."
         )
-
-        # Capture metadata
-        metadata_file = metadata.generate(
-            nifti_files,
-            work_dir,
-            dcm2niix_input_dir,
-            retain_sidecar=True,
-            retain_nifti=True,
-            pydeface_intermediaries=pydeface_intermediaries,
-            classification=classification,
-            modality=modality,
-        )
+        if nifti_files is not None:
+            # Capture metadata
+            metadata_file = metadata.generate(
+                nifti_files,
+                work_dir,
+                dcm2niix_input_dir,
+                retain_sidecar=True,
+                retain_nifti=True,
+                pydeface_intermediaries=pydeface_intermediaries,
+                classification=classification,
+                modality=modality,
+            )
 
         work_dir_contents = glob.glob(work_dir + "/*")
         for item in work_dir_contents:

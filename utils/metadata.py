@@ -126,13 +126,14 @@ def generate(
 
                 except InvalidDicomError:
                     continue
+                    dicom_data = {}
 
         else:
             log.info("Unable to capture additional metadata from DICOMs.")
             dicom_data = {}
 
         # Remove metadata with None value
-        dicom_data = {k:v for k, v in dicom_data.items() if v is not None}
+        dicom_data = {k: v for k, v in dicom_data.items() if v is not None}
 
         # Collate metadata from dicom header and dcm2niix sidecar into one dictionary
         metadata = {**sidecar_info, **dicom_data}

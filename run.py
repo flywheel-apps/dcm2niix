@@ -43,8 +43,17 @@ def main(gear_context):
         nifti_files = None
 
     if not isinstance(nifti_files, list):
-        log.error("Outputs not produced from dcm2niix conversion. Exiting.")
-        os.sys.exit(1)
+        log.error("NIfTIs not produced from dcm2niix conversion. Exiting.")
+        if not gear_context.config['ignore_errors']:
+            os.sys.exit(1)
+        else:
+            log.warning(
+                "Expert Option (ignore_errors). "
+                "We trust that since you have selected this option "
+                "you know what you are asking for. "
+                "Continuing."
+            )
+            nifti_files = None
 
     # Apply coil combined method
     if gear_context.config["coil_combine"]:

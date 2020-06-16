@@ -119,7 +119,6 @@ def decompress_dicoms(dcm2niix_input_dir):
     )
 
     for file in dicom_files:
-        log.info("Decompressing dicom files.")
 
         # Decompress with gcdmconv in place (overwriting the compressed dicom)
         command = ["gdcmconv", "--raw", file, file]
@@ -155,8 +154,12 @@ def coil_combine(nifti_files):
 
     """
     log.warning(
-        "Expert Option (coil_combine). We make no effort to check for independent coil data; we trust that you know what you are asking for if you have selected this option."
+            "Expert Option (coil_combine). "
+            "We trust that since you have selected this option "
+            "you know what you are asking for. "
+            "Continuing."
     )
+
     for nifti_file in nifti_files:
 
         try:

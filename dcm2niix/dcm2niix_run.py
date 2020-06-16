@@ -117,8 +117,12 @@ def convert_directory(
 
         if convert_only_series != "all":
             log.warning(
-                "Expert Option (convert_only_series). We trust that if you have selected this option you know what you are asking for."
+                "Expert Option (convert_only_series). "
+                "We trust that since you have selected this option "
+                "you know what you are asking for. "
+                "Continuing."
             )
+
             # See: https://www.nitrc.org/forum/forum.php?thread_id=11134&forum_id=4703
             converter.inputs.series_numbers = convert_only_series
 
@@ -129,7 +133,7 @@ def convert_directory(
         log.info(f"Output from dcm2niix: \n\n{output.runtime.stdout }\n")
 
         # If error from dcm2niix software, then raise exception
-        if output.runtime.returncode == 1:
+        if int(output.runtime.returncode) == 1:
             raise Exception("The dcm2niix software pacakage returned an error.")
         else:
             log.info("Finished dcm2niix conversion.")
