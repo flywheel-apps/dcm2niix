@@ -68,8 +68,14 @@ def generate(
             sidecar_info = json.load(sidecar_file, strict=False)
 
             # Capture the fields required to select a single DICOM for metadata
-            series_description = sidecar_info["SeriesDescription"]
-            series_number = str(sidecar_info["SeriesNumber"])
+            try:
+                series_description = sidecar_info["SeriesDescription"]
+            except KeyError:
+                series_description = ''
+            try:
+                series_number = str(sidecar_info["SeriesNumber"])
+            except KeyError:
+                series_number = ''
 
             # Retain the modality set in the config; otherwise, replace with sidecar
             # captured modality determined via dcm2niix and if neither modality set
