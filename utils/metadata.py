@@ -125,8 +125,8 @@ def generate(
                             break
 
                 except InvalidDicomError:
-                    continue
                     dicom_data = {}
+                    continue
 
         else:
             log.info("Unable to capture additional metadata from DICOMs.")

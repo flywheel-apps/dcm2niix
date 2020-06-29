@@ -73,17 +73,6 @@ def prepare_dcm2niix_input(infile, rec_infile, work_dir):
     elif rec_infile:
         log.info(f"Establishing input as par/rec file pair: {infile} & {rec_infile}")
 
-        try:
-            nb.parrec.load(rec_infile).shape
-        except UnicodeDecodeError:
-            log.exception(
-                (
-                    "Incorrect gear input. "
-                    "rec_file_input must be a valid REC file. Exiting."
-                )
-            )
-            os.sys.exit(1)
-
         # If a REC file input was provided, check infile for a valid PAR file
         if infile.lower().endswith("par"):
 
@@ -101,11 +90,26 @@ def prepare_dcm2niix_input(infile, rec_infile, work_dir):
             dcm2niix_input_dir, dirname = setup_dcm2niix_input_dir(infile, work_dir)
             shutil.copy2(rec_infile, dcm2niix_input_dir)
             shutil.copy2(infile, dcm2niix_input_dir)
+
+            # Now that the PARREC pair of files are in the same directory, make sure
+            # the REC file is a valid REC file
+            try:
+                nb.parrec.load(f"{dcm2niix_input_dir}/{rec_infile.split('/')[-1]}").shape
+            except UnicodeDecodeError:
+                log.exception(
+                    (
+                        "Incorrect gear input. "
+                        "rec_file_input must be a valid REC file. Exiting."
+                    )
+                )
+                os.sys.exit(1)
+
             adjust_parrec_filenames(dcm2niix_input_dir, dirname)
 
     else:
-        log.error("Incorrect gear input. Exiting.")
-        os.sys.exit(1)
+        # Assume all other inputs will function downstream
+        dcm2niix_input_dir, dirname = setup_dcm2niix_input_dir(infile, work_dir)
+        shutil.copy2(infile, dcm2niix_input_dir)
 
     log.info("Input for dcm2niix prepared successfully.")
 
