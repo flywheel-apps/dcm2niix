@@ -90,20 +90,6 @@ def prepare_dcm2niix_input(infile, rec_infile, work_dir):
             dcm2niix_input_dir, dirname = setup_dcm2niix_input_dir(infile, work_dir)
             shutil.copy2(rec_infile, dcm2niix_input_dir)
             shutil.copy2(infile, dcm2niix_input_dir)
-
-            # Now that the PARREC pair of files are in the same directory, make sure
-            # the REC file is a valid REC file
-            try:
-                nb.parrec.load(f"{dcm2niix_input_dir}/{rec_infile.split('/')[-1]}").shape
-            except UnicodeDecodeError:
-                log.exception(
-                    (
-                        "Incorrect gear input. "
-                        "rec_file_input must be a valid REC file. Exiting."
-                    )
-                )
-                os.sys.exit(1)
-
             adjust_parrec_filenames(dcm2niix_input_dir, dirname)
 
     else:
