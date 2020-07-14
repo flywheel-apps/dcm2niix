@@ -83,15 +83,6 @@ def generate(
             if modality is None:
                 if "Modality" in sidecar_info:
                     modality = sidecar_info["Modality"]
-                else:
-                    modality = "MR"
-
-        # Set proper empty classification dictionary if not provided as input
-        if classification is None:
-            classification = {
-                              "Intent": [],
-                              "Measurement": []
-            }
 
         # Using the unique set of SeriesDescription and SeriesNumber from the DICOM
         # header, capture additional metadata.
@@ -180,7 +171,7 @@ def generate(
                                                 metadata,
                                                 modality
                 )
-                capture_metadata.append(filedata)
+            capture_metadata.append(filedata)
 
             bvec = os.path.join(
                                 work_dir, re.sub(
@@ -237,6 +228,20 @@ def generate(
                     capture_metadata.append(filedata)
 
     # fmt: on
+    # If modality is not set, remove modality and classification from the metadata file
+    if modality is None:
+        for file in capture_metadata:
+            file.pop('modality')
+            file.pop('classification')
+
+    # If classification is not set, remove classification from the metadata file
+    if classification is None:
+        for file in capture_metadata:
+            try:
+                file.pop('classification')
+            except KeyError:
+                continue
+
     # Collate the metadata and write to file
     metadata = {}
     metadata["acquisition"] = {}
