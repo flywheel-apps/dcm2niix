@@ -109,8 +109,9 @@ def exit_if_archive_empty(archive_obj):
 
     else:
         log.info(
-            "Unsupported archive format. Unable to establish size of input archive."
+            "Unsupported archive format. Unable to establish size of input archive. Exiting."
         )
+        os.sys.exit(1)
 
     if size_contents == 0:
         log.error("Incorrect gear input. Input archive is empty. Exiting.")

@@ -92,15 +92,13 @@ def convert_directory(
             )
             filename = "%p_%s"
 
-        if compress_nifti in ["y", "n", "3"]:
-            converter.inputs.compress = compress_nifti
-        else:
-            log.warning("Configuration option error: compress_nifti")
+        converter.inputs.compress = compress_nifti
 
         if (compression_level > 0) and (compression_level < 10):
             converter.inputs.compression = compression_level
         else:
-            log.warning("Configuration option error: compression_level")
+            log.error("Configuration option error: compression_level must be between 1 and 9. Exiting.")
+            os.sys.exit(1)
 
         converter.inputs.out_filename = filename
 
