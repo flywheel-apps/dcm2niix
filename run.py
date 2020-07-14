@@ -43,11 +43,12 @@ def main(gear_context):
         nifti_files = None
 
     if not isinstance(nifti_files, list):
-        log.error("NIfTIs not produced from dcm2niix conversion. Exiting.")
         if not gear_context.config['ignore_errors']:
+            log.error("NIfTIs not produced from dcm2niix conversion. Exiting.")
             os.sys.exit(1)
         else:
             log.warning(
+                "NIfTIs not produced from dcm2niix conversion."
                 "Expert Option (ignore_errors). "
                 "We trust that since you have selected this option "
                 "you know what you are asking for. "

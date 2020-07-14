@@ -23,7 +23,7 @@ def setup(infile, rec_infile, work_dir, remove_incomplete_volumes, decompress_di
         dicom_file = glob.glob(dcm2niix_input_dir + "/*")[0]
 
         try:
-            pydicom.filereader.dcmread(dicom_file)
+            pydicom.filereader.dcmread(dicom_file, force=True)
         except pydicom.errors.InvalidDicomError:
             log.info(
                 (

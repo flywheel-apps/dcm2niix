@@ -2,6 +2,8 @@
 
 import logging
 import pprint
+import os
+from pathlib import Path
 
 log = logging.getLogger(__name__)
 
@@ -24,7 +26,13 @@ def generate_gear_args(gear_context, FLAG):
         }
 
         if gear_context.get_input_path("rec_file_input"):
-            gear_args["rec_infile"] = gear_context.get_input_path("rec_file_input")
+
+            rec_infile = Path(gear_context.get_input_path("rec_file_input"))
+            if rec_infile.is_file():
+                gear_args["rec_infile"] = rec_infile
+            else:
+                log.error('Configuration for rec_infile_input is not a valid path. Exiting.')
+                os.sys.exit(1)
 
     elif FLAG == "dcm2niix":
 
@@ -66,14 +74,24 @@ def generate_gear_args(gear_context, FLAG):
         }
 
         if gear_context.get_input_path("pydeface_template"):
-            gear_args["template"] = gear_context.get_input_path("pydeface_template")
-            log.info(f"Found input template for pydeface: {gear_args['template']}")
+            pydeface_template = Path(gear_context.get_input_path("pydeface_template"))
+            if pydeface_template.is_file():
+                gear_args["template"] = pydeface_template
+                log.info(f"Found input template for pydeface: {gear_args['template']}")
+            else:
+                log.error('Configuration for pydeface_template is not a valid path. Exiting.')
+                os.sys.exit(1)
         else:
             log.info("No input template provided for pydeface. Defaults assumed.")
 
         if gear_context.get_input_path("pydeface_facemask"):
-            gear_args["facemask"] = gear_context.get_input_path("pydeface_facemask")
-            log.info(f"Found input facemask for pydeface: {gear_args['facemask']}")
+            pydeface_facemask = Path(gear_context.get_input_path("pydeface_facemask"))
+            if pydeface_facemask.is_file():
+                gear_args["facemask"] = pydeface_facemask
+                log.info(f"Found input facemask for pydeface: {gear_args['facemask']}")
+            else:
+                log.error('Configuration for pydeface_facemask is not a valid path. Exiting.')
+                os.sys.exit(1)
         else:
             log.info("No input facemask provided for pydeface. Defaults assumed.")
 
