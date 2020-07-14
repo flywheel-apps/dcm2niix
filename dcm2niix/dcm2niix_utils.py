@@ -50,7 +50,7 @@ def remove_incomplete_volumes(dcm2niix_input_dir):
 
         # If missing volumes found, two directories (corrected_dcm and orphan_dcm)
         # in the dcm2niix input directory are created.
-        corrected_dcm_dir = "/".join([dcm2niix_input_dir, "corrected_dcm"])
+        corrected_dcm_dir = os.path.join(dcm2niix_input_dir, "corrected_dcm")
         orphan_dcm = "/".join([dcm2niix_input_dir, "orphan_dcm"])
 
         if os.path.isdir(corrected_dcm_dir):

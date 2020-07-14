@@ -36,7 +36,7 @@ def convert_directory(
             the files from the input(s).
         output_dir (str): The absolute path to the output directory to place the
             converted results.
-        anonymize_bids (bool): If rrue, anonymize sidecar.
+        anonymize_bids (bool): If True, anonymize sidecar.
         bids_sidecar (str): Output sidecar; 'y'=yes, 'n'=no, 'o'=only
             (whereby no NIfTI file will be generated).
         compress_nifti (str): Compress output NIfTI file; 'y'=yes, 'n'=no, '3'=no,3D.
@@ -95,12 +95,12 @@ def convert_directory(
         if compress_nifti in ["y", "n", "3"]:
             converter.inputs.compress = compress_nifti
         else:
-            log.info("Configuration option error: compress_nifti")
+            log.warning("Configuration option error: compress_nifti")
 
         if (compression_level > 0) and (compression_level < 10):
             converter.inputs.compression = compression_level
         else:
-            log.info("Configuration option error: compression_level")
+            log.warning("Configuration option error: compression_level")
 
         converter.inputs.out_filename = filename
 

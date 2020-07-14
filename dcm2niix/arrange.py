@@ -8,8 +8,6 @@ import shutil
 import tarfile
 import zipfile
 
-import nibabel as nb
-
 
 log = logging.getLogger(__name__)
 
@@ -35,14 +33,14 @@ def prepare_dcm2niix_input(infile, rec_infile, work_dir):
     """
     log.info("Arrange dcm2niix input.")
 
-    if infile.endswith(".zip"):
+    if zipfile.is_zipfile(infile):
 
         try:
 
-            with zipfile.ZipFile(infile, "r") as zipObj:
+            with zipfile.ZipFile(infile, "r") as zip_obj:
                 log.info(f"Establishing input as zip file: {infile}")
-                is_archive_empty(zipObj)
-                dcm2niix_input_dir = extract_archive_contents(zipObj, work_dir)
+                exit_if_archive_empty(zip_obj)
+                dcm2niix_input_dir = extract_archive_contents(zip_obj, work_dir)
 
         except zipfile.BadZipFile:
             log.exception(
@@ -53,13 +51,13 @@ def prepare_dcm2niix_input(infile, rec_infile, work_dir):
             )
             os.sys.exit(1)
 
-    elif infile.endswith(".tgz"):
+    elif tarfile.is_tarfile(infile):
 
         try:
-            with tarfile.open(infile, "r") as tarObj:
+            with tarfile.open(infile, "r") as tar_obj:
                 log.info(f"Establishing input as tar file: {infile}")
-                is_archive_empty(tarObj)
-                dcm2niix_input_dir = extract_archive_contents(tarObj, work_dir)
+                exit_if_archive_empty(tar_obj)
+                dcm2niix_input_dir = extract_archive_contents(tar_obj, work_dir)
 
         except tarfile.ReadError:
             log.exception(
@@ -72,7 +70,7 @@ def prepare_dcm2niix_input(infile, rec_infile, work_dir):
 
     elif rec_infile:
         log.info(f"Establishing input as par/rec file pair: {infile} & {rec_infile}")
-        
+
         # If a REC file input was provided, check infile for a valid PAR file
         if infile.lower().endswith("par") and rec_infile.lower().endswith("rec"):
 
@@ -85,11 +83,12 @@ def prepare_dcm2niix_input(infile, rec_infile, work_dir):
             log.error(
                     (
                         "Incorrect gear input. If rec_file_input provided, "
-                        "dcm2niix_input must be a valid PAR file. Exiting."
+                        "dcm2niix_input must be a valid PAR file. "
+                        "rec_infile must be a valid REC file. Exiting."
                     )
                 )
             os.sys.exit(1)
-    
+
     else:
         # Assume all other inputs will function downstream
         dcm2niix_input_dir, dirname = setup_dcm2niix_input_dir(infile, work_dir)
@@ -100,13 +99,13 @@ def prepare_dcm2niix_input(infile, rec_infile, work_dir):
     return dcm2niix_input_dir
 
 
-def is_archive_empty(archiveObj):
+def exit_if_archive_empty(archive_obj):
     """If the archive contents are empty, log an error and exit."""
-    if type(archiveObj) == zipfile.ZipFile:
-        size_contents = sum([zipinfo.file_size for zipinfo in archiveObj.filelist])
+    if type(archive_obj) == zipfile.ZipFile:
+        size_contents = sum([zipinfo.file_size for zipinfo in archive_obj.filelist])
 
-    elif type(archiveObj) == tarfile.TarFile:
-        size_contents = sum([tarinfo.size for tarinfo in archiveObj.getmembers()])
+    elif type(archive_obj) == tarfile.TarFile:
+        size_contents = sum([tarinfo.size for tarinfo in archive_obj.getmembers()])
 
     else:
         log.info(
@@ -118,39 +117,39 @@ def is_archive_empty(archiveObj):
         os.sys.exit(1)
 
 
-def extract_archive_contents(archiveObj, work_dir):
+def extract_archive_contents(archive_obj, work_dir):
     """Extract archive contents to a directory created from the input filename."""
     # 1. Get the stage for zip or tar archive
-    if type(archiveObj) == zipfile.ZipFile:
-        subdirs = [info.filename for info in archiveObj.infolist() if info.is_dir()]
-        filename = archiveObj.filename
-        filelist = archiveObj.namelist()
+    if type(archive_obj) == zipfile.ZipFile:
+        subdirs = [info.filename for info in archive_obj.infolist() if info.is_dir()]
+        filename = archive_obj.filename
+        filelist = archive_obj.namelist()
 
-    elif type(archiveObj) == tarfile.TarFile:
-        subdirs = [info.name for info in archiveObj.getmembers() if info.isdir()]
-        filename = archiveObj.name
-        filelist = archiveObj.getnames()
+    elif type(archive_obj) == tarfile.TarFile:
+        subdirs = [info.name for info in archive_obj.getmembers() if info.isdir()]
+        filename = archive_obj.name
+        filelist = archive_obj.getnames()
 
     # 2. Extract archive contents to directory
     if len(subdirs) == 0:
 
         # Input filename will be used as the dcm2niix input directory name
         dcm2niix_input_dir, dirname = setup_dcm2niix_input_dir(filename, work_dir)
-        archiveObj.extractall(dcm2niix_input_dir)
+        archive_obj.extractall(dcm2niix_input_dir)
 
     elif len(subdirs) == 1:
 
         # Subdirectory name will be used as the dcm2niix input directory name
         dcm2niix_input_dir, dirname = setup_dcm2niix_input_dir(subdirs[0], work_dir)
 
-        if type(archiveObj) == zipfile.ZipFile:
-            archiveObj.extractall(
-                dcm2niix_input_dir, strip_prefix_ziparchive(archiveObj, subdirs[0])
+        if type(archive_obj) == zipfile.ZipFile:
+            archive_obj.extractall(
+                dcm2niix_input_dir, strip_prefix_ziparchive(archive_obj, subdirs[0])
             )
 
-        if type(archiveObj) == tarfile.TarFile:
-            archiveObj.extractall(
-                dcm2niix_input_dir, strip_prefix_tararchive(archiveObj, subdirs[0])
+        if type(archive_obj) == tarfile.TarFile:
+            archive_obj.extractall(
+                dcm2niix_input_dir, strip_prefix_tararchive(archive_obj, subdirs[0])
             )
 
     else:
@@ -180,7 +179,7 @@ def setup_dcm2niix_input_dir(infile, work_dir):
         filename = infile
 
     dirname = clean_filename(filename)
-    dcm2niix_input_dir = "/".join([work_dir, dirname])
+    dcm2niix_input_dir = os.path.join(work_dir, dirname)
     os.mkdir(dcm2niix_input_dir)
 
     return dcm2niix_input_dir, dirname
@@ -206,12 +205,16 @@ def clean_filename(filename):
     # Do not end on an underscore
     filename = filename.rstrip("_")
 
+    # if no alphanumerics are present in the filename, set the filename to inputs
+    if len(filename) == 0:
+        filename = 'inputs'
+
     return filename
 
 
-def strip_prefix_ziparchive(zipObj, prefix):
+def strip_prefix_ziparchive(zip_obj, prefix):
     """Modify a filepath in a zip archive without the prefix."""
-    for zipinfo in zipObj.infolist():
+    for zipinfo in zip_obj.infolist():
 
         if (
             zipinfo.filename.startswith(prefix)
@@ -226,9 +229,9 @@ def strip_prefix_ziparchive(zipObj, prefix):
             yield zipinfo
 
 
-def strip_prefix_tararchive(tarObj, prefix):
+def strip_prefix_tararchive(tar_obj, prefix):
     """Modify a filepath in a tar archive without the prefix."""
-    for tarinfo in tarObj.getmembers():
+    for tarinfo in tar_obj.getmembers():
 
         if (
             tarinfo.path.startswith(prefix)
@@ -256,5 +259,5 @@ def adjust_parrec_filenames(dcm2niix_input_dir, filename):
 
         filepath = os.path.split(file)[0]
         extension = os.path.splitext(file)[-1]
-        renamed = "/".join([filepath, filename]) + extension.lower()
+        renamed = os.path.join(filepath, filename) + extension.lower()
         os.rename(file, renamed)
