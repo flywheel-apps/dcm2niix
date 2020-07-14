@@ -154,10 +154,10 @@ def coil_combine(nifti_files):
 
     """
     log.warning(
-            "Expert Option (coil_combine). "
-            "We trust that since you have selected this option "
-            "you know what you are asking for. "
-            "Continuing."
+        "Expert Option (coil_combine). "
+        "We trust that since you have selected this option "
+        "you know what you are asking for. "
+        "Continuing."
     )
 
     for nifti_file in nifti_files:

@@ -43,7 +43,7 @@ def main(gear_context):
         nifti_files = None
 
     if not isinstance(nifti_files, list):
-        if not gear_context.config['ignore_errors']:
+        if not gear_context.config["ignore_errors"]:
             log.error("NIfTIs not produced from dcm2niix conversion. Exiting.")
             os.sys.exit(1)
         else:

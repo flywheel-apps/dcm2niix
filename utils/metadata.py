@@ -231,14 +231,14 @@ def generate(
     # If modality is not set, remove modality and classification from the metadata file
     if modality is None:
         for file in capture_metadata:
-            file.pop('modality')
-            file.pop('classification')
+            file.pop("modality")
+            file.pop("classification")
 
     # If classification is not set, remove classification from the metadata file
     if classification is None:
         for file in capture_metadata:
             try:
-                file.pop('classification')
+                file.pop("classification")
             except KeyError:
                 continue
 

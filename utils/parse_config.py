@@ -31,7 +31,9 @@ def generate_gear_args(gear_context, FLAG):
             if rec_infile.is_file():
                 gear_args["rec_infile"] = rec_infile
             else:
-                log.error('Configuration for rec_infile_input is not a valid path. Exiting.')
+                log.error(
+                    "Configuration for rec_infile_input is not a valid path. Exiting."
+                )
                 os.sys.exit(1)
 
     elif FLAG == "dcm2niix":
@@ -79,7 +81,9 @@ def generate_gear_args(gear_context, FLAG):
                 gear_args["template"] = pydeface_template
                 log.info(f"Found input template for pydeface: {gear_args['template']}")
             else:
-                log.error('Configuration for pydeface_template is not a valid path. Exiting.')
+                log.error(
+                    "Configuration for pydeface_template is not a valid path. Exiting."
+                )
                 os.sys.exit(1)
         else:
             log.info("No input template provided for pydeface. Defaults assumed.")
@@ -90,7 +94,9 @@ def generate_gear_args(gear_context, FLAG):
                 gear_args["facemask"] = pydeface_facemask
                 log.info(f"Found input facemask for pydeface: {gear_args['facemask']}")
             else:
-                log.error('Configuration for pydeface_facemask is not a valid path. Exiting.')
+                log.error(
+                    "Configuration for pydeface_facemask is not a valid path. Exiting."
+                )
                 os.sys.exit(1)
         else:
             log.info("No input facemask provided for pydeface. Defaults assumed.")

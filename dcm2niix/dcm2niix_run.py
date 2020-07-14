@@ -97,7 +97,9 @@ def convert_directory(
         if (compression_level > 0) and (compression_level < 10):
             converter.inputs.compression = compression_level
         else:
-            log.error("Configuration option error: compression_level must be between 1 and 9. Exiting.")
+            log.error(
+                "Configuration option error: compression_level must be between 1 and 9. Exiting."
+            )
             os.sys.exit(1)
 
         converter.inputs.out_filename = filename

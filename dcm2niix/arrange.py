@@ -81,12 +81,12 @@ def prepare_dcm2niix_input(infile, rec_infile, work_dir):
 
         else:
             log.error(
-                    (
-                        "Incorrect gear input. If rec_file_input provided, "
-                        "dcm2niix_input must be a valid PAR file. "
-                        "rec_infile must be a valid REC file. Exiting."
-                    )
+                (
+                    "Incorrect gear input. If rec_file_input provided, "
+                    "dcm2niix_input must be a valid PAR file. "
+                    "rec_infile must be a valid REC file. Exiting."
                 )
+            )
             os.sys.exit(1)
 
     else:
@@ -208,7 +208,7 @@ def clean_filename(filename):
 
     # if no alphanumerics are present in the filename, set the filename to inputs
     if len(filename) == 0:
-        filename = 'inputs'
+        filename = "inputs"
 
     return filename
 
