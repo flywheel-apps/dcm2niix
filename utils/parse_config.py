@@ -57,9 +57,6 @@ def generate_gear_args(gear_context, FLAG):
             "text_notes_private": gear_context.config["text_notes_private"],
         }
 
-        if gear_context.config["vol3D"]:
-            gear_args["compress_nifti"] = "3"
-
         # Anonymization cascade
         if gear_context.config["pydeface"]:
             gear_args["anonymize_bids"] = True
