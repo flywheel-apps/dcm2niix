@@ -1,4 +1,4 @@
-"""Testing takes less than 1 minute."""
+"""Testing for functions within arrange.py script."""
 
 import filecmp
 import pytest

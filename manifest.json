@@ -1,8 +1,8 @@
 {
   "name": "dcm2niix",
   "label": "DICOM to NIfTI conversion using dcm2niix with an optional implementation of PyDeface.",
-  "description": "Implementation of Chris Rorden's dcm2niix for converting DICOM to NIfTI, with optional implementation of Poldrack Lab's PyDeface to remove facial structures from NIfTI.",
-  "version": "1.0.0_1.0.20200331_rc1",
+  "description": "Implementation of Chris Rorden's dcm2niix for converting DICOM to NIfTI, with an optional implementation of Poldrack Lab's PyDeface to remove facial structures from NIfTI.",
+  "version": "1.0.0_1.0.20200331_rc2",
   "author": "Flywheel",
   "maintainer": "Flywheel <support@flywheel.io>",
   "source": "https://github.com/rordenlab/dcm2niix & https://github.com/poldracklab/pydeface",
@@ -12,7 +12,7 @@
   "custom": {
        "gear-builder": {
            "category": "converter",
-           "image": "flywheel/dcm2niix:1.0.0_1.0.20200331_rc1"
+           "image": "flywheel/dcm2niix:1.0.0_1.0.20200331_rc2"
       },
       "flywheel": {
           "suite": "Conversion"
@@ -110,7 +110,7 @@
           "maximum": 9
       },
       "convert_only_series": {
-          "description": "Selectively convert by series number - can be used up to 16 times. Options: 'all' (default), space-separated list of series numbers (e.g., '2 12 20'). WARNING: Expert Option. We trust that if you have selected this option you know what you are asking for.",
+          "description": "Selectively convert by series number - can be used up to 16 times. Options: 'all' (default), space-separated list of series numbers (e.g., '2 12 20'). WARNING: Expert Option. We trust that if you have selected this option, you know what you are asking for.",
           "type": "string",
           "default": "all"
       },
@@ -135,7 +135,7 @@
           "default": false
       },
       "ignore_errors": {
-          "description": "Ignore dcm2niix errors and exit status, and preserve outputs. Options: true, false (default). By default, when dcm2niix exits non-zero, outputs are not preserved. WARNING: Expert Option. We trust that if you have selected this option you know what you are asking for.",
+          "description": "Ignore dcm2niix errors and the exit status, and preserve outputs. Options: true, false (default). By default, when dcm2niix exits non-zero, outputs are not preserved. WARNING: Expert Option. We trust that if you have selected this option, you know what you are asking for.",
           "type": "boolean",
           "default": false
       },
@@ -145,7 +145,7 @@
           "default": false
       },
       "merge2d": {
-          "description": "Merge 2D slices from same series regardless of study time, echo, coil, orientation, etc. Options: true, false (default).",
+          "description": "Merge 2D slices from the same series regardless of study time, echo, coil, orientation, etc. Options: true, false (default).",
           "type": "boolean",
           "default": false
       },
@@ -189,7 +189,7 @@
           "default": false
       },
       "single_file_mode": {
-          "description": "Single file mode, do not convert other images in folder. Options: true, false (default).",
+          "description": "Single file mode, do not convert other images in the folder. Options: true, false (default).",
           "type": "boolean",
           "default": false
       },
@@ -198,11 +198,6 @@
           "type": "boolean",
           "default": false
       },
-      "vol3D": {
-          "description": "Output 3D uncompressed volumes. Options: true, false (default). If true, the filename flag will be set to '-f %p_%s' to prevent overwriting files.",
-          "type": "boolean",
-          "default": false
-      }
   },
   "command": "python3 run.py",
   "environment":{

@@ -1,4 +1,4 @@
-"""Testing takes approximately 17 minutes."""
+"""Testing for functions within pydeface_run.py script."""
 
 import os
 import shutil

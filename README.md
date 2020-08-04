@@ -1,4 +1,4 @@
-# dcm2niix gear - DICOM to NIfTI conversion using dcm2niix with an optional implementation of PyDeface.
+# dcm2niix Gear
 
 A [Flywheel Gear](https://github.com/flywheel-io/gears/tree/master/spec) for implementing [Chris Rorden's dcm2niix](https://github.com/rordenlab/dcm2niix) for converting DICOM to NIfTI, with an optional implementation of [Poldrack Lab's PyDeface](https://github.com/poldracklab/pydeface) to remove facial structures from NIfTI.
 
@@ -20,7 +20,7 @@ A [Flywheel Gear](https://github.com/flywheel-io/gears/tree/master/spec) for imp
 
 #### dcm2niix
 * **anonymize_bids**: Anonymize BIDS. Options: true (default), false. 'bids_sidecar' config option must be enabled (i.e., 'y' or 'o' options).
-* **bids_sidecar**: Output BIDS sidecar in JSON format. Options are 'y'=yes (default), 'n'=no, 'o'=only (whereby no NIfTI file will be generated). Note, bids_sidecar is always invoked when running dcm2niix to be used as metadata. User configuration preference is handled after acquiring metdata.
+* **bids_sidecar**: Output BIDS sidecar in JSON format. Options are 'y'=yes (default), 'n'=no, 'o'=only (whereby no NIfTI file will be generated). Note, bids_sidecar is always invoked when running dcm2niix to be used as metadata. User configuration preference is handled after acquiring metadata.
 * **compress_nifti**: Compress output NIfTI file. Options: 'y'=yes (default), 'n'=no, '3'=no,3D. If option '3' is chosen, the filename flag will be set to '-f %p_%s' to prevent overwriting files.
 * **compression_level**: Set the gz compression level. Options: 1 (fastest) to 9 (smallest), 6 (default).
 * **convert_only_series**: Selectively convert by series number - can be used up to 16 times. Options: 'all' (default), space-separated list of series numbers (e.g., '2 12 20'). WARNING: Expert Option. We trust that if you have selected this option you know what you are asking for.
@@ -44,4 +44,3 @@ A [Flywheel Gear](https://github.com/flywheel-io/gears/tree/master/spec) for imp
 * **coil_combine**: For sequences with individual coil data, saved as individual volumes, this option will save a NIfTI file with ONLY the combined coil data (i.e., the last volume). Options: true, false (default). WARNING: Expert Option. We make no effort to check for independent coil data; we trust that you know what you are asking for if you have selected this option.
 * **decompress_dicoms**: Decompress DICOM files before conversion. This will perform decompression using gdcmconv and then perform the conversion using dcm2niix. Options: true, false (default).
 * **remove_incomplete_volumes**: Remove incomplete trailing volumes for 4D scans aborted mid-acquisition before dcm2niix conversion. Options: true, false (default).
-* **vol3D**: Output 3D uncompressed volumes. Options: true, false (default). If true, the filename flag will be set to '-f %p_%s' to prevent overwriting files.

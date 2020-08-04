@@ -1,4 +1,4 @@
-"""Testing takes less than 1 minute."""
+"""Testing for functions within dcm2niix_utils.py script."""
 
 import pytest
 
