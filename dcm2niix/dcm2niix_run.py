@@ -36,7 +36,7 @@ def convert_directory(
             the files from the input(s).
         output_dir (str): The absolute path to the output directory to place the
             converted results.
-        anonymize_bids (bool): If True, anonymize sidecar.
+        anonymize_bids (bool): If true, anonymize sidecar.
         bids_sidecar (str): Output sidecar; 'y'=yes, 'n'=no, 'o'=only
             (whereby no NIfTI file will be generated).
         compress_nifti (str): Compress output NIfTI file; 'y'=yes, 'n'=no, '3'=no,3D.

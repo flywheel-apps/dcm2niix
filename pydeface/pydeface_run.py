@@ -19,12 +19,12 @@ def deface_multiple_niftis(
     """Run PyDeface on a list of NIfTI files.
 
      Args:
-        nifti_files (list): The paths to NIfTI files to generate coil combined data for.
-        pydeface_cost (str): FSL-Flirt cost function. Options: 'mutualinfo' (default),
+        nifti_files (list): The paths to NIfTI files to be defaced.
+        pydeface_cost (str): FSL-FLIRT cost function. Options: 'mutualinfo' (default),
             'corratio', 'normcorr', 'normal', 'leastsq', 'labeldiff', 'bbr'.
         template (str): The absolute path to an optional template image that will be
             used as the registration target instead of the default.
-        facemask (str): The absolute path to an optional faskmask image that will be
+        facemask (str): The absolute path to an optional facemask image that will be
             used instead of the default.
         pydeface_nocleanup (bool): If true, do not clean up temporary files.
         pydeface_verbose (bool): If true, show additional status prints.
@@ -55,12 +55,12 @@ def deface_single_nifti(
     """Run PyDeface on a single of NIfTI file.
 
      Args:
-        infile (str): The absolute path to the input NIfTI file.
-        pydeface_cost (str): FSL-Flirt cost function. Options: 'mutualinfo' (default),
+        infile (str): The absolute path to the input NIfTI file to be defaced.
+        pydeface_cost (str): FSL-FLIRT cost function. Options: 'mutualinfo' (default),
             'corratio', 'normcorr', 'normal', 'leastsq', 'labeldiff', 'bbr'.
         template (str): The absolute path to an optional template image that will be
             used as the registration target instead of the default.
-        facemask (str): The absolute path to an optional faskmask image that will be
+        facemask (str): The absolute path to an optional facemask image that will be
             used instead of the default.
         pydeface_nocleanup (bool): If true, do not clean up temporary files.
         pydeface_verbose (bool): If true, show additional status prints.
