@@ -22,7 +22,7 @@ def generate(
     retain_nifti=True,
     pydeface_intermediaries=False,
     classification=None,
-    modality=None,
+    modality=None
 ):
     """Generate file metadata from dcm2niix output.
 
@@ -247,8 +247,8 @@ def generate(
     metadata["acquisition"] = {}
     metadata["acquisition"]["files"] = capture_metadata
     metadata_file = os.path.join(work_dir, ".metadata.json")
-    with open(metadata_file, "w") as fObj:
-        json.dump(metadata, fObj)
+    with open(metadata_file, "w") as file_obj:
+        json.dump(metadata, file_obj)
 
     log.info("Metadata generation completed successfully.")
     metadata_formatted = pprint.pformat(metadata)
@@ -302,7 +302,10 @@ def dicom_metadata_extraction(dicom_header):
         dicom_data["SpacingBetweenSlices"] = None
 
     try:
-        dicom_data["PixelSpacing"] = dicom_header.PixelSpacing
+        dicom_data["PixelSpacing"] = [
+                float(dicom_header.PixelSpacing[0]),
+                float(dicom_header.PixelSpacing[1])
+                ]
     except AttributeError:
         dicom_data["PixelSpacing"] = None
 
