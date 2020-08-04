@@ -197,7 +197,7 @@
           "description": "Text notes including private patient details. Options: true, false (default).",
           "type": "boolean",
           "default": false
-      },
+      }
   },
   "command": "python3 run.py",
   "environment":{

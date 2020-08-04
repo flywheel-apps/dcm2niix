@@ -22,7 +22,7 @@ def setup(
     retain_nifti=True,
     pydeface_intermediaries=False,
     classification=None,
-    modality=None,
+    modality=None
 ):
     """Orchestrate resolution of gear, including metadata capture and file retention.
 
@@ -61,7 +61,7 @@ def setup(
                 retain_nifti=True,
                 pydeface_intermediaries=pydeface_intermediaries,
                 classification=classification,
-                modality=modality,
+                modality=modality
             )
 
         work_dir_contents = glob.glob(work_dir + "/*")
@@ -81,7 +81,7 @@ def setup(
             retain_nifti=retain_nifti,
             pydeface_intermediaries=pydeface_intermediaries,
             classification=classification,
-            modality=modality,
+            modality=modality
         )
 
         # Retain gear outputs
@@ -92,7 +92,7 @@ def setup(
             output_dir,
             retain_sidecar=retain_sidecar,
             retain_nifti=retain_nifti,
-            pydeface_intermediaries=pydeface_intermediaries,
+            pydeface_intermediaries=pydeface_intermediaries
         )
 
 
@@ -103,7 +103,7 @@ def retain_gear_outputs(
     output_dir,
     retain_sidecar=True,
     retain_nifti=True,
-    pydeface_intermediaries=False,
+    pydeface_intermediaries=False
 ):
     """Move selected gear outputs to the output directory.
 
