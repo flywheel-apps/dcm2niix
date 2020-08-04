@@ -276,25 +276,25 @@ def dicom_metadata_extraction(dicom_header):
         dicom_data["AcquisitionDuration"] = None
 
     if dicom_data["AcquisitionDuration"] is None:
-
         try:
             dicom_data["AcquisitionDuration"] = dicom_header[0x0018, 0x9073].value
         except (AttributeError, KeyError):
             dicom_data["AcquisitionDuration"] = None
 
-    # Number of dynamics is the number of temporal positions
     try:
-        dicom_data["NumberOfDynamics"] = dicom_header.NumberOfTemporalPositions
+        dicom_data["NumberOfTemporalPositions"] = dicom_header.NumberOfTemporalPositions
     except AttributeError:
-        dicom_data["NumberOfDynamics"] = None
+        dicom_data["NumberOfTemporalPositions"] = None
 
-    # Calculate field of view
     try:
-        fov_x = round(dicom_header.PixelSpacing[0] * dicom_header.Columns)
-        fov_y = round(dicom_header.PixelSpacing[1] * dicom_header.Rows)
-        dicom_data["FOV"] = [fov_x, fov_y]
-    except (AttributeError, IndexError):
-        dicom_data["FOV"] = None
+        dicom_data["Columns"] = dicom_header.Columns
+    except AttributeError:
+        dicom_data["Columns"] = None
+
+    try:
+        dicom_data["Rows"] = dicom_header.Rows
+    except AttributeError:
+        dicom_data["Rows"] = None
 
     try:
         dicom_data["SpacingBetweenSlices"] = float(dicom_header.SpacingBetweenSlices)
@@ -302,17 +302,26 @@ def dicom_metadata_extraction(dicom_header):
         dicom_data["SpacingBetweenSlices"] = None
 
     try:
-        dicom_data["PixelSpacing"] = [
-            float(dicom_header.PixelSpacing[0]),
-            float(dicom_header.PixelSpacing[1]),
-        ]
+        dicom_data["PixelSpacing"] = dicom_header.PixelSpacing
     except AttributeError:
         dicom_data["PixelSpacing"] = None
 
     try:
-        dicom_data["Resolution"] = calculate_resolution(dicom_header)
+        dicom_data["PercentPhaseFieldOfView"] = dicom_header.PercentPhaseFieldOfView
     except AttributeError:
-        dicom_data["Resolution"] = None
+        dicom_data["PercentPhaseFieldOfView"] = None
+
+    try:
+        dicom_data["PercentSampling"] = dicom_header.PercentSampling
+    except AttributeError:
+        dicom_data["PercentSampling"] = None
+
+    try:
+        dicom_data[
+            "InPlanePhaseEncodingDirection"
+        ] = dicom_header.InPlanePhaseEncodingDirection
+    except AttributeError:
+        dicom_data["InPlanePhaseEncodingDirection"] = None
 
     try:
         dicom_data["AcquisitionMatrix"] = dicom_header.AcquisitionMatrix
@@ -355,57 +364,6 @@ def dicom_metadata_extraction(dicom_header):
         dicom_data["ScanType"] = None
 
     return dicom_data
-
-
-def calculate_resolution(dicom_header):
-    """Calculate the voxel resolution from a dicom file header."""
-    # See: https://neurostars.org/t/calculating-voxel-resolution-from-dicom-headers/7091
-    try:
-
-        fov_frequency = round(dicom_header.PixelSpacing[0] * dicom_header.Columns)
-
-        # FOV_phase = FOV * percent phase FOV
-        # Percent phase FOV (also known as RFOV) is the ratio of FOV dimension in phase
-        # direction to the FOV dimension in the frequency direction.
-        rfov = dicom_header.PercentPhaseFieldOfView / 100
-        fov_phase = round(dicom_header.PixelSpacing[1] * dicom_header.Rows * rfov)
-
-        # Percent sampling is the fraction of acquisition matrix lines acquired.
-        percent_sampling = dicom_header.PercentSampling / 100
-
-        if (
-            dicom_header.InPlanePhaseEncodingDirection == "ROW"
-            or dicom_header.InPlanePhaseEncodingDirection == "OTHER"
-        ):
-
-            acquisition_matrix_frequency = dicom_header.AcquisitionMatrix[1]
-            acquisition_matrix_phase = round(
-                dicom_header.AcquisitionMatrix[2] * rfov * percent_sampling
-            )
-
-        elif dicom_header.InPlanePhaseEncodingDirection == "COL":
-
-            acquisition_matrix_frequency = dicom_header.AcquisitionMatrix[0]
-            acquisition_matrix_phase = round(
-                dicom_header.AcquisitionMatrix[3] * rfov * percent_sampling
-            )
-
-        pixel_size_frequency = fov_frequency / acquisition_matrix_frequency
-        pixel_size_phase = fov_phase / acquisition_matrix_phase
-
-        voxel_x = f"{pixel_size_frequency:3.3f}"
-        voxel_y = f"{pixel_size_phase:3.3f}"
-        voxel_z = f"{dicom_header.SliceThickness:3.3f}"
-
-        resolution = [voxel_x, voxel_y, voxel_z]
-
-    except AttributeError:
-        resolution = None
-
-    except ZeroDivisionError:
-        resolution = None
-
-    return resolution
 
 
 def create_file_metadata(filename, filetype, classification, bids_info, modality):
