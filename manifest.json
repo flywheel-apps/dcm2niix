@@ -2,17 +2,17 @@
   "name": "dcm2niix",
   "label": "DICOM to NIfTI conversion using dcm2niix with an optional implementation of PyDeface.",
   "description": "Implementation of Chris Rorden's dcm2niix for converting DICOM to NIfTI, with an optional implementation of Poldrack Lab's PyDeface to remove facial structures from NIfTI.",
-  "version": "1.0.0_1.0.20200331_rc2",
+  "version": "1.0.0_1.0.20200331_rc3",
   "author": "Flywheel",
   "maintainer": "Flywheel <support@flywheel.io>",
-  "source": "https://github.com/rordenlab/dcm2niix & https://github.com/poldracklab/pydeface",
-  "url": "https://github.com/flywheel-apps/dcm2niix/blob/master/README.md",
+  "url": "https://github.com/rordenlab/dcm2niix & https://github.com/poldracklab/pydeface",
+  "source": "https://github.com/flywheel-apps/dcm2niix",
   "cite": "dcm2niix doi: 10.1016/j.jneumeth.2016.03.001 & PyDeface doi: 10.5281/zenodo.3524401",
   "license": "Other",
   "custom": {
        "gear-builder": {
            "category": "converter",
-           "image": "flywheel/dcm2niix:1.0.0_1.0.20200331_rc2"
+           "image": "flywheel/dcm2niix:1.0.0_1.0.20200331"
       },
       "flywheel": {
           "suite": "Conversion"

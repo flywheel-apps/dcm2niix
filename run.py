@@ -4,7 +4,7 @@
 import logging
 import os
 
-import flywheel
+import flywheel_gear_toolkit
 
 from dcm2niix import prepare
 from dcm2niix import dcm2niix_utils
@@ -21,7 +21,6 @@ log = logging.getLogger()
 
 def main(gear_context):
     """Orchestrate dcm2niix gear."""
-    gear_context = flywheel.GearContext()
 
     # Prepare dcm2niix input, which is a directory of dicom or parrec images
     gear_args = parse_config.generate_gear_args(gear_context, "prepare")
@@ -82,7 +81,8 @@ def main(gear_context):
 
 if __name__ == "__main__":
 
-    with flywheel.GearContext() as gear_context:
+    with flywheel_gear_toolkit.GearToolkitContext() as gear_context:
+        log = gear_context.log
         exit_status = main(gear_context)
 
     log.info(f"Successful dcm2niix gear execution with exit status {exit_status}.")
