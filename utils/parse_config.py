@@ -119,20 +119,16 @@ def generate_gear_args(gear_context, FLAG):
             gear_args["pydeface_intermediaries"] = True
 
         try:
-            gear_args["classification"] = gear_context.config["inputs"][
-                "dcm2niix_input"
-            ]["object"]["classification"]
-        except Exception as e:
+            classification = gear_context.config_json.get('inputs', {}).get('dcm2niix_input', {}).get('object', {}).get('classification')
+            if classification != {}:
+                gear_args["classification"] = classification
+        except KeyError:
             log.info("Cannot determine classification from configuration.")
-            log.debug(e)
 
         try:
-            gear_args["modality"] = gear_context.config["inputs"]["dcm2niix_input"][
-                "object"
-            ]["modality"]
-        except Exception as e:
+            gear_args["modality"] = gear_context.config_json.get('inputs', {}).get('dcm2niix_input', {}).get('object', {}).get('modality')
+        except KeyError:
             log.info("Cannot determine modality from configuration.")
-            log.debug(e)
 
     gear_args_formatted = pprint.pformat(gear_args)
     log.info(f"Prepared gear stage arguments: \n\n{gear_args_formatted}\n")

@@ -86,6 +86,7 @@ def generate(
 
         # Using the unique set of SeriesDescription and SeriesNumber from the DICOM
         # header, capture additional metadata.
+        dicom_data = {}
         if dcm2niix_input_dir:
             log.info("Capturing additional metadata from DICOMs.")
 
@@ -122,12 +123,10 @@ def generate(
                             break
 
                 except InvalidDicomError:
-                    dicom_data = {}
                     continue
 
         else:
             log.info("Unable to capture additional metadata from DICOMs.")
-            dicom_data = {}
 
         # Remove metadata with None value
         dicom_data = {k: v for k, v in dicom_data.items() if v is not None}
