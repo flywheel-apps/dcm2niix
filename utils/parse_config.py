@@ -17,18 +17,25 @@ def generate_gear_args(gear_context, FLAG):
 
         infile = gear_context.get_input_path("dcm2niix_input")
         try:
-            with open(infile, 'r') as f:
+            with open(infile, "r") as f:
                 log.debug(f"{infile} opened from dcm2niix_input.")
         except FileNotFoundError:
 
             # Path separation in filename may cause downloaded filename to be altered
-            filename = gear_context.config_json.get('inputs', {}).get('dcm2niix_input', {}).get('location', {}).get('name')
-            if len(filename.split('/')) > 1:
+            filename = (
+                gear_context.config_json.get("inputs", {})
+                .get("dcm2niix_input", {})
+                .get("location", {})
+                .get("name")
+            )
+            if len(filename.split("/")) > 1:
                 infile = f"/flywheel/v0/input/dcm2niix_input/{filename.split('/')[-1]}"
 
                 try:
-                    with open(infile, 'r') as f:
-                        log.debug(f"{infile} opened from path separated dcm2niix_input.")
+                    with open(infile, "r") as f:
+                        log.debug(
+                            f"{infile} opened from path separated dcm2niix_input."
+                        )
                 except FileNotFoundError:
                     log.error("Unable to open dcm2niix_input. Exiting.")
                     os.sys.exit(1)
@@ -137,16 +144,26 @@ def generate_gear_args(gear_context, FLAG):
             gear_args["pydeface_intermediaries"] = True
 
         try:
-            classification = gear_context.config_json.get('inputs', {}).get('dcm2niix_input', {}).get('object', {}).get('classification')
+            classification = (
+                gear_context.config_json.get("inputs", {})
+                .get("dcm2niix_input", {})
+                .get("object", {})
+                .get("classification")
+            )
             # If modality is set and classification is not set, classification returned as {'Custom':[]}
             # If modality and classification are not set, classification returned as {}
-            if classification != {} and classification != {'Custom':[]}:
+            if classification != {} and classification != {"Custom": []}:
                 gear_args["classification"] = classification
         except KeyError:
             log.info("Cannot determine classification from configuration.")
 
         try:
-            gear_args["modality"] = gear_context.config_json.get('inputs', {}).get('dcm2niix_input', {}).get('object', {}).get('modality')
+            gear_args["modality"] = (
+                gear_context.config_json.get("inputs", {})
+                .get("dcm2niix_input", {})
+                .get("object", {})
+                .get("modality")
+            )
         except KeyError:
             log.info("Cannot determine modality from configuration.")
 

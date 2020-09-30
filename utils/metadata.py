@@ -22,7 +22,7 @@ def generate(
     retain_nifti=True,
     pydeface_intermediaries=False,
     classification=None,
-    modality=None
+    modality=None,
 ):
     """Generate file metadata from dcm2niix output.
 
@@ -302,9 +302,9 @@ def dicom_metadata_extraction(dicom_header):
 
     try:
         dicom_data["PixelSpacing"] = [
-                float(dicom_header.PixelSpacing[0]),
-                float(dicom_header.PixelSpacing[1])
-                ]
+            float(dicom_header.PixelSpacing[0]),
+            float(dicom_header.PixelSpacing[1]),
+        ]
     except AttributeError:
         dicom_data["PixelSpacing"] = None
 

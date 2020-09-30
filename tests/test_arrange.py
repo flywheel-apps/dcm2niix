@@ -31,7 +31,7 @@ def test_CleanInfilepath_Extensions_Match():
     assert arrange.clean_filename("dicom.dicom.zip") == "dicom"
     assert arrange.clean_filename("dicom.dcm.tgz") == "dicom"
     assert arrange.clean_filename("parrec.parrec.zip") == "parrec"
-    assert arrange.clean_filename("parrec.par") == "parrec"
+    assert arrange.clean_filename("parrec.PAR") == "parrec"
     assert arrange.clean_filename("parrec") == "parrec"
 
 
