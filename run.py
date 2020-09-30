@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """Main script for dcm2niix gear."""
 
-import logging
 import os
 
 import flywheel_gear_toolkit
@@ -12,11 +12,6 @@ from dcm2niix import dcm2niix_run
 from pydeface import pydeface_run
 from utils import parse_config
 from utils import resolve
-
-
-FORMAT = "[%(asctime)s - %(levelname)s - %(name)s:%(lineno)d] %(message)s"
-logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt="%Y-%m-%d")
-log = logging.getLogger()
 
 
 def main(gear_context):
@@ -82,6 +77,7 @@ def main(gear_context):
 if __name__ == "__main__":
 
     with flywheel_gear_toolkit.GearToolkitContext() as gear_context:
+        gear_context.init_logging()
         log = gear_context.log
         exit_status = main(gear_context)
 
