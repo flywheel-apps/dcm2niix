@@ -117,7 +117,7 @@ jobs:
           name: Test
           command: |
             docker run -it --volumes-from source-vol --name test ${DOCKER_IMAGE_NAME} \
-              bash -c "source /etc/fsl/5.0/fsl.sh && pip3 install --user -r tests/requirements.txt && PATH=/home/flywheel/.local/bin:\$PATH && python3 -m pytest --junitxml=test-reports/junit.xml"
+              bash -c "source /etc/fsl/5.0/fsl.sh && pip3 install --user -r tests/requirements.txt && PATH=/home/flywheel/.local/bin:\$PATH && python3 -m pytest --cov=. --cov-report html --junitxml=test-reports/junit.xml"
             docker cp test:/flywheel/v0/htmlcov .
             docker cp test:/flywheel/v0/test-reports .
       - store_test_results:
