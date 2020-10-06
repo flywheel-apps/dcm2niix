@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/flywheel-apps/dcm2niix.svg?style=shield)](https://app.circleci.com/pipelines/github/flywheel-apps/dcm2niix)
+
 # dcm2niix Gear
 
 A [Flywheel Gear](https://github.com/flywheel-io/gears/tree/master/spec) for implementing [Chris Rorden's dcm2niix](https://github.com/rordenlab/dcm2niix) for converting DICOM to NIfTI, with an optional implementation of [Poldrack Lab's PyDeface](https://github.com/poldracklab/pydeface) to remove facial structures from NIfTI.
