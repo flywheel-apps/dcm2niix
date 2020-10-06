@@ -1,4 +1,5 @@
 [![CircleCI](https://circleci.com/gh/flywheel-apps/dcm2niix.svg?style=shield)](https://app.circleci.com/pipelines/github/flywheel-apps/dcm2niix)
+[![Docker Pulls](https://img.shields.io/docker/pulls/flywheel/dcm2niix.svg)](https://hub.docker.com/r/flywheel/dcm2niix/)
 
 # dcm2niix Gear
 
