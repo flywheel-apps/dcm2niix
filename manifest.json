@@ -80,7 +80,7 @@
       "bids_sidecar": {
           "description": "Output BIDS sidecar in JSON format. Options are 'y'=yes, 'n'=no (default), 'o'=only (whereby no NIfTI file will be generated).",
           "type": "string",
-          "default": "y",
+          "default": "n",
           "enum": [
               "y",
               "n",
