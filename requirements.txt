@@ -1,0 +1,6 @@
+flywheel-gear-toolkit>=0.1.1
+nibabel~=3.1.0
+nipype~=1.5.0
+numpy~=1.18.5
+pydeface~=2.0.0
+pydicom~=2.0.0
