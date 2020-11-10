@@ -31,8 +31,8 @@ RUN apt-get update -qq \
     unzip \
     pigz
 
-# Compile dcm2niix from source (version 31-March-2020 (v1.0.20200331))
-ENV DCMCOMMIT=485c387c93bbca3b29b93403dfde211c4bc39af6
+# Compile dcm2niix from source (version 2-November-2020 (v1.0.20201102))
+ENV DCMCOMMIT=081c6300d0cf47088f0873cd586c9745498f637a
 RUN curl -#L  https://github.com/rordenlab/dcm2niix/archive/$DCMCOMMIT.zip | bsdtar -xf- -C /usr/local
 WORKDIR /usr/local/dcm2niix-${DCMCOMMIT}/build
 RUN cmake -DUSE_OPENJPEG=ON -MY_DEBUG_GE=ON ../ && \
