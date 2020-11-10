@@ -2,7 +2,7 @@
   "name": "dcm2niix",
   "label": "DICOM to NIfTI conversion using dcm2niix with an optional implementation of PyDeface.",
   "description": "Implementation of Chris Rorden's dcm2niix for converting DICOM to NIfTI, with an optional implementation of Poldrack Lab's PyDeface to remove facial structures from NIfTI.",
-  "version": "1.0.0_1.0.20200331",
+  "version": "1.1.0_1.0.20201102_dev0",
   "author": "Flywheel",
   "maintainer": "Flywheel <support@flywheel.io>",
   "url": "https://github.com/rordenlab/dcm2niix & https://github.com/poldracklab/pydeface",
@@ -12,7 +12,7 @@
   "custom": {
        "gear-builder": {
            "category": "converter",
-           "image": "flywheel/dcm2niix:1.0.0_1.0.20200331"
+           "image": "flywheel/dcm2niix:1.1.0_1.0.20201102_dev0"
       },
       "flywheel": {
           "suite": "Conversion"
@@ -92,12 +92,18 @@
           "type": "boolean",
           "default": false
       },
+      "comment": {
+          "description": "If non-empty, store comment as NIfTI aux_file. Options: non-empty string, 24 characters maximum.",
+          "type": "str",
+          "default": ""
+      },
       "compress_nifti": {
-          "description": "Compress output NIfTI file. Options: 'y'=yes (default), 'n'=no, '3'=no,3D. If option '3' is chosen, the filename flag will be set to '-f %p_%s' to prevent overwriting files.",
+          "description": "Compress output NIfTI file. Options: 'y'=yes (default), 'i'=internal, 'n'=no, '3'=no,3D. If option '3' is chosen, the filename flag will be set to '-f %p_%s' to prevent overwriting files.",
           "type": "string",
           "default": "y",
           "enum": [
               "y",
+              "i",
               "n",
               "3"
           ]
@@ -125,7 +131,7 @@
           "default": false
       },
       "filename": {
-          "description": "Output filename template (%a=antenna (coil) number, %c=comments, %d=description, %e=echo number, %f=folder name, %i=ID of patient, %j=seriesInstanceUID, %k=studyInstanceUID, %m=manufacturer, %n=name of patient, %p=protocol, %s=series number, %t=time, %u=acquisition number, %v=vendor, %x=study ID; %z=sequence name). '%f' (default).",
+          "description": "Output filename template. Options: %a=antenna (coil) number, %c=comments, %d=description, %e=echo number, %f=folder name, %i=ID of patient, %j=seriesInstanceUID, %k=studyInstanceUID, %m=manufacturer, %n=name of patient, %p=protocol, %s=series number, %t=time, %u=acquisition number, %v=vendor, %x=study ID, %z=sequence name. Can combine any of the options into a phrase (e.g., '%f_%p_%t_%s'). '%f' (default).",
           "type": "string",
           "default": "%f"
       },
@@ -140,12 +146,22 @@
           "default": false
       },
       "lossless_scaling": {
-          "description": "Losslessly scale 16-bit integers to use dynamic range. Options: true, false (default).",
-          "type": "boolean",
-          "default": false
+          "description": "Losslessly scale 16-bit integers to use dynamic range. Options: 'y'=scale, 'n'=no, but unit16->int16 (default), 'o'=original.",
+          "type": "string",
+          "default": "n",
+          "enum": [
+              "y",
+              "n",
+              "o"
+          ]
       },
       "merge2d": {
           "description": "Merge 2D slices from the same series regardless of study time, echo, coil, orientation, etc. Options: true, false (default).",
+          "type": "boolean",
+          "default": false
+      },
+      "output_nrrd": {
+          "description": "Export as NRRD instead of NIfTI. Options: true, false (default).",
           "type": "boolean",
           "default": false
       },
@@ -195,6 +211,11 @@
       },
       "text_notes_private": {
           "description": "Text notes including private patient details. Options: true, false (default).",
+          "type": "boolean",
+          "default": false
+      },
+      "verbose": {
+          "description": "Whether to include verbose output from dcm2niix call. Options: true, false (default).",
           "type": "boolean",
           "default": false
       }

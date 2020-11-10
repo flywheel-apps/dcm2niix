@@ -13,13 +13,14 @@ log = logging.getLogger(__name__)
 
 
 def setup(
-    nifti_files,
+    output_image_files,
     work_dir,
     dcm2niix_input_dir,
     output_dir,
     ignore_errors=False,
     retain_sidecar=True,
     retain_nifti=True,
+    output_nrrd=False,
     pydeface_intermediaries=False,
     classification=None,
     modality=None,
@@ -27,12 +28,15 @@ def setup(
     """Orchestrate resolution of gear, including metadata capture and file retention.
 
     Args:
-        nifti_files (list): The absolute paths to NIfTI files to resolve.
+        output_image_files (list): The absolute paths to gear image files to resolve.
+            Typically these are NIfTI files, but can be the two files constituting the
+            NRRD format (i.e., ".raw" and ".nhdr").
         work_dir (str): The absolute path to the output directory of dcm2niix and where
             the metadata file generated is written to.
         dcm2niix_input_dir (str): The absolute path to the input directory to dcm2niix.
         retain_sidecar (bool): If true, sidecar is retained in final output.
         retain_nifti (bool): If true, NIfTI is retained in final output.
+        output_nrrd (bool): If true, export as NRRD instead of NIfTI.
         pydeface_intermediaries (bool): If true, PyDeface intermediary files are
             retained. The files created when --nocleanup flag is applied to the
             PyDeface command.
@@ -51,14 +55,15 @@ def setup(
             "you know what you are asking for. "
             "Continuing."
         )
-        if nifti_files is not None:
+        if output_image_files is not None:
             # Capture metadata
             metadata_file = metadata.generate(
-                nifti_files,
+                output_image_files,
                 work_dir,
                 dcm2niix_input_dir,
                 retain_sidecar=True,
                 retain_nifti=True,
+                output_nrrd=False,
                 pydeface_intermediaries=pydeface_intermediaries,
                 classification=classification,
                 modality=modality,
@@ -74,11 +79,12 @@ def setup(
 
         # Capture metadata
         metadata_file = metadata.generate(
-            nifti_files,
+            output_image_files,
             work_dir,
             dcm2niix_input_dir,
             retain_sidecar=retain_sidecar,
             retain_nifti=retain_nifti,
+            output_nrrd=output_nrrd,
             pydeface_intermediaries=pydeface_intermediaries,
             classification=classification,
             modality=modality,
@@ -86,35 +92,40 @@ def setup(
 
         # Retain gear outputs
         retain_gear_outputs(
-            nifti_files,
+            output_image_files,
             metadata_file,
             work_dir,
             output_dir,
             retain_sidecar=retain_sidecar,
             retain_nifti=retain_nifti,
+            output_nrrd=output_nrrd,
             pydeface_intermediaries=pydeface_intermediaries,
         )
 
 
 def retain_gear_outputs(
-    nifti_files,
+    output_image_files,
     metadata_file,
     work_dir,
     output_dir,
     retain_sidecar=True,
     retain_nifti=True,
+    output_nrrd=False,
     pydeface_intermediaries=False,
 ):
     """Move selected gear outputs to the output directory.
 
     Args:
-        nifti_files (list): The absolute paths to NIfTI files to resolve.
+        output_image_files (list): The absolute paths to gear image files to resolve.
+            Typically these are NIfTI files, but can be the two files constituting the
+            NRRD format (i.e., ".raw" and ".nhdr").
         metadata_file (str): The absolute path to the metadata file.
         work_dir (str): The absolute path to the output directory of dcm2niix and
             where the generated metadata file is.
         output_dir (str): The absolute path to the gear output directory.
         retain_sidecar (bool): If true, sidecar is retained in final output.
         retain_nifti (bool): If true, NIfTI is retained in final output.
+        output_nrrd (bool): If true, export as NRRD instead of NIfTI.
         pydeface_intermediaries (bool): If true, pydeface intermediary files are
             retained. The files created when --nocleanup flag is applied to the
             pydeface command.
@@ -124,15 +135,23 @@ def retain_gear_outputs(
 
     """
     log.info("Resolving gear outputs.")
+
+    if retain_nifti == output_nrrd:
+        log.critical(
+            "Function arguments retain_nifti and output_nrrd are exclusive. Gear config logic is broken. Exiting."
+        )
+        os.sys.exit(1)
+
     # fmt: off
 
-    for file in nifti_files:
+    for file in output_image_files:
 
         # Move bids json sidecar file, if indicated
-        if retain_sidecar:
+        # If NRRD format, two files per sidecar - move sidecar once
+        if retain_sidecar and not file.endswith(".nhdr"):
             bids_sidecar = os.path.join(
                                         work_dir, re.sub(
-                                                         r"(\.nii\.gz|\.nii)",
+                                                         r"(\.nii\.gz|\.nii|.nhdr|\.raw\.gz)",
                                                          ".json",
                                                          os.path.basename(file))
             )
@@ -141,7 +160,7 @@ def retain_gear_outputs(
             log.info(f"Moving {bids_sidecar} to output directory.")
 
         # Move niftis and associated files (.bval, .bvec, .mat), if indicated
-        if retain_nifti:
+        if retain_nifti and not output_nrrd:
 
             # Move bval file, if exists
             bval = os.path.join(
@@ -194,6 +213,11 @@ def retain_gear_outputs(
                     log.info(f"Moving {pydeface_matlab} to output directory.")
 
             # Move nifti file
+            shutil.move(file, output_dir)
+            log.info(f"Moving {file} to output directory.")
+
+        # Move nrrd files
+        if output_nrrd and not retain_nifti:
             shutil.move(file, output_dir)
             log.info(f"Moving {file} to output directory.")
 
