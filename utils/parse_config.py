@@ -92,7 +92,7 @@ def generate_gear_args(gear_context, FLAG):
             "philips_scaling": gear_context.config["philips_scaling"],
             "single_file_mode": gear_context.config["single_file_mode"],
             "text_notes_private": gear_context.config["text_notes_private"],
-            "verbose": gear_context.config["verbose"],
+            "verbose": gear_context.config["dcm2niix_verbose"],
         }
 
         # Anonymization cascade

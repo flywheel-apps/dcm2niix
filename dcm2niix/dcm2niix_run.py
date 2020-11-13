@@ -78,6 +78,7 @@ def convert_directory(
 
         converter = Dcm2niix()
         log.info(f"Starting dcm2niix {converter.version}")
+        log.info(f"Submitting {len(os.listdir(source_dir))} DICOMs.")
 
         converter.inputs.source_dir = source_dir
         converter.inputs.output_dir = output_dir
