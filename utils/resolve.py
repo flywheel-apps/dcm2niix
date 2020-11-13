@@ -1,4 +1,5 @@
-"""Function to resolve dcm2niix gear outputs."""
+"""Functions to resolve dcm2niix gear outputs."""
+# ENH: refactor script to make more explicit on output image formats and black compatible throughout, if possible.
 
 import glob
 import logging

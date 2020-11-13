@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Main script for dcm2niix gear."""
+# MAIN: cleanse and collate logic on ignore errors and empty image output scenarios
 
 import os
 
