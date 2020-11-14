@@ -15,11 +15,12 @@ log = logging.getLogger(__name__)
 
 
 def generate(
-    nifti_files,
+    output_image_files,
     work_dir,
     dcm2niix_input_dir=None,
     retain_sidecar=True,
     retain_nifti=True,
+    output_nrrd=False,
     pydeface_intermediaries=False,
     classification=None,
     modality=None,
@@ -31,13 +32,16 @@ def generate(
         configuration settings.
 
     Args:
-        nifti_files (list): The absolute paths to nifti files to resolve.
+        output_image_files (list): The absolute paths to gear image files to resolve.
+            Typically these are NIfTI files, but can be the two files constituting the
+            NRRD format (i.e., ".raw" and ".nhdr").
         work_dir (str): The absolute path to the output directory of dcm2niix and where
             the metadata file generated is written to.
         dcm2niix_input_dir (str): The absolute path to a set of dicoms as input
             to dcm2niix.
         retain_sidecar (bool): If true, sidecar is retained in final output.
         retain_nifti (bool): If true, nifti is retained in final output.
+        output_nrrd (bool): If true, export as NRRD instead of NIfTI.
         pydeface_intermediaries (bool): If True, pydeface intermediary files are
             retained. The files created when --nocleanup flag is applied to the
             pydeface command.
@@ -50,16 +54,22 @@ def generate(
     """
     log.info("Generating metadata.")
 
+    if retain_nifti == output_nrrd:
+        log.critical(
+            "Function arguments retain_nifti and output_nrrd are exclusive. Gear config logic is broken. Exiting."
+        )
+        os.sys.exit(1)
+
     capture_metadata = []
 
     # fmt: off
     # Append metadata from dicom header and from the associated bids sidecar
-    for file in nifti_files:
+    for file in output_image_files:
 
         # Capture the path to associated sidecar
         sidecar = os.path.join(
                                work_dir, re.sub(
-                                                r"(\.nii\.gz|\.nii)",
+                                                r"(\.nii\.gz|\.nii|\.nhdr|\.raw\.gz)",
                                                 ".json",
                                                 os.path.basename(file))
         )
@@ -135,7 +145,9 @@ def generate(
         metadata = {**sidecar_info, **dicom_data}
 
         # Apply collated metadata to all associated files
-        if retain_sidecar:
+
+        # Sidecar; if NRRD format, two files per sidecar - capture sidecar once
+        if retain_sidecar and not file.endswith(".nhdr"):
             filedata = create_file_metadata(
                                             sidecar,
                                             "source code",
@@ -145,7 +157,8 @@ def generate(
             )
             capture_metadata.append(filedata)
 
-        if retain_nifti:
+        # NIfTI
+        if retain_nifti and not output_nrrd:
             filedata = create_file_metadata(
                                             file,
                                             "nifti",
@@ -225,6 +238,18 @@ def generate(
                                                     modality,
                     )
                     capture_metadata.append(filedata)
+
+        # NRRD
+        if output_nrrd and not retain_nifti:
+
+            filedata = create_file_metadata(
+                                            file,
+                                            "nrrd",
+                                            classification,
+                                            metadata,
+                                            modality
+            )
+            capture_metadata.append(filedata)
 
     # fmt: on
     # If modality is not set, remove modality and classification from the metadata file

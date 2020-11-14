@@ -16,18 +16,21 @@ def convert_directory(
     output_dir,
     anonymize_bids=True,
     bids_sidecar="y",
+    comment="",
     compress_nifti="y",
     compression_level=6,
     convert_only_series="all",
     crop=False,
-    filename="%f",
+    filename="%f_%p_%t_%s",
     ignore_derived=False,
     ignore_errors=False,
     lossless_scaling=False,
     merge2d=False,
+    output_nrrd=False,
     philips_scaling=True,
     single_file_mode=False,
     text_notes_private=False,
+    verbose=False,
 ):
     """Run dcm2niix.
 
@@ -39,9 +42,11 @@ def convert_directory(
         anonymize_bids (bool): If true, anonymize sidecar.
         bids_sidecar (str): Output sidecar; 'y'=yes, 'n'=no, 'o'=only
             (whereby no NIfTI file will be generated).
-        compress_nifti (str): Compress output NIfTI file; 'y'=yes, 'n'=no, '3'=no,3D.
-            If option '3' is chosen, the filename flag will be set to '-f %p_%s'
-            to prevent overwriting files.
+        comment (str): If non-empty, store comment as NIfTI aux_file
+            (up to 24 characters).
+        compress_nifti (str): Compress output NIfTI file; 'y'=yes, 'i'=internal,
+            'n'=no, '3'=no,3D. If option '3' is chosen, the filename flag will
+            be set to '-f %p_%s' to prevent overwriting files.
         compression_level (int): Set the gz compression level: 1 (fastest) to
             9 (smallest).
         convert_only_series (str): Space-separated list of series numbers to convert or
@@ -51,14 +56,18 @@ def convert_directory(
         ignore_derived (bool): If true, ignore derived, localizer, and 2D images.
         ignore_errors (bool): If true, ignore dcm2niix errors and exit status,
             and preserve outputs.
-        lossless_scaling (bool): If true, losslessly scale 16-bit integers
-            to use dynamic range.
-        merge2d (bool): If true, merge 2D slices from same series.
+        lossless_scaling (str): Losslessly scale 16-bit integers to use dynamic
+            range. Options: 'y'=scale, 'n'=no, but unit16->int16 (default),
+            'o'=original.",
+        merge2d (bool): If true, merge 2D slices from same series
+            regardless of echo, exposure, etc.
+        output_nrrd (bool): If true, export as NRRD instead of NIfTI.
         philips_scaling (bool): If true, Philips precise float (not display) scaling.
         single_file_mode (bool): If true, single file mode, do not convert other
             images in folder.
         text_notes_private (bool): If true, retain text notes including
             private patient details.
+        verbose (bool): If true, verbose output from dcm2niix call.
 
     Returns:
         output (nipype.interfaces.base.support.InterfaceResult): The dcm2niix
@@ -69,11 +78,12 @@ def convert_directory(
 
         converter = Dcm2niix()
         log.info(f"Starting dcm2niix {converter.version}")
+        log.info(f"Submitting {len(os.listdir(source_dir))} DICOMs.")
 
         converter.inputs.source_dir = source_dir
         converter.inputs.output_dir = output_dir
 
-        # dcm2niix command configurations for bids sidecar generation and anonymization
+        # dcm2niix command configurations for: anonymize_bids, bids_sidecar
         if bids_sidecar == "o":
             converter.inputs.bids_format = True
             converter.inputs.anon_bids = anonymize_bids
@@ -84,17 +94,27 @@ def convert_directory(
             log.info("The BIDS sidecar file will not be generated.")
             converter.inputs.bids_format = False
 
-        # dcm2niix command configurations for filename and compression
-        if compress_nifti == "3":
+        # dcm2niix command configurations for: comment
+        if comment and (len(comment) < 25):
+            converter.inputs.comment = comment
+
+        # dcm2niix command configurations for: compress nifti
+        if str(compress_nifti) == "3":
             log.info(
                 "Outputs will be saved as uncompressed 3D volumes. \
                        \nFilename will be set to %p_%s to prevent overwritting files."
             )
             filename = "%p_%s"
 
-        converter.inputs.compress = compress_nifti
+        if str(compress_nifti) in ["y", "i", "n", "3"]:
+            converter.inputs.compress = str(compress_nifti)
 
-        if (compression_level > 0) and (compression_level < 10):
+        # dcm2niix command configurations for: compression_level
+        if (
+            (compression_level > 0)
+            and (compression_level < 10)
+            and isinstance(compression_level, int)
+        ):
             converter.inputs.compression = compression_level
         else:
             log.error(
@@ -102,19 +122,7 @@ def convert_directory(
             )
             os.sys.exit(1)
 
-        converter.inputs.out_filename = filename
-
-        # Additional dcm2niix command configurations
-        converter.inputs.crop = crop
-        converter.inputs.has_private = text_notes_private
-        converter.inputs.ignore_deriv = ignore_derived
-        converter.inputs.merge_imgs = merge2d
-        converter.inputs.philips_float = philips_scaling
-        converter.inputs.single_file = single_file_mode
-
-        if lossless_scaling:
-            converter.inputs.args = "-l y"
-
+        # dcm2niix command configurations for: convert_only_series
         if convert_only_series != "all":
             log.warning(
                 "Expert Option (convert_only_series). "
@@ -125,6 +133,37 @@ def convert_directory(
 
             # See: https://www.nitrc.org/forum/forum.php?thread_id=11134&forum_id=4703
             converter.inputs.series_numbers = convert_only_series
+
+        # dcm2niix command configurations for: crop
+        converter.inputs.crop = crop
+
+        # dcm2niix command configurations for: filename
+        converter.inputs.out_filename = filename.replace(" ", "_")
+
+        # dcm2niix command configurations for: ignore_derived
+        converter.inputs.ignore_deriv = ignore_derived
+
+        # dcm2niix command configurations for: lossless_scaling
+        if lossless_scaling in ["y", "n", "o"]:
+            converter.inputs.args = f"-l {lossless_scaling}"
+
+        # dcm2niix command configurations for: merge2d
+        converter.inputs.merge_imgs = merge2d
+
+        # dcm2niix command configurations for: output_nrrd
+        converter.inputs.to_nrrd = output_nrrd
+
+        # dcm2niix command configurations for: philips_scaling
+        converter.inputs.philips_float = philips_scaling
+
+        # dcm2niix command configurations for: single_file_mode
+        converter.inputs.single_file = single_file_mode
+
+        # dcm2niix command configurations for: text_notes_private
+        converter.inputs.has_private = text_notes_private
+
+        # dcm2niix command configurations for: verbose
+        converter.inputs.verbose = verbose
 
         # Log the dcm2niix command configuration and run
         log.info(f"Command to be executed: \n\n{converter.cmdline}\n")
@@ -144,6 +183,7 @@ def convert_directory(
         log.exception(e, exc_info=False)
         output = None
 
+        # dcm2niix command configurations for: ignore_errors
         if not ignore_errors:
             os.sys.exit(1)
 

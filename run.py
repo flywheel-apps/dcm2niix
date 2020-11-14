@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Main script for dcm2niix gear."""
+# MAIN: cleanse and collate logic on ignore errors and empty image output scenarios
 
 import os
 
@@ -29,14 +30,14 @@ def main(gear_context):
 
     # Nipype interface output from dcm2niix can be a string or list (desired)
     if output is not None:
-        nifti_files = output.outputs.converted_files
+        output_image_files = output.outputs.converted_files
 
-        if isinstance(nifti_files, str):
-            nifti_files = [nifti_files]
+        if isinstance(output_image_files, str):
+            output_image_files = [output_image_files]
     else:
-        nifti_files = None
+        output_image_files = None
 
-    if not isinstance(nifti_files, list):
+    if not isinstance(output_image_files, list):
         if not gear_context.config["ignore_errors"]:
             log.error("NIfTIs not produced from dcm2niix conversion. Exiting.")
             os.sys.exit(1)
@@ -48,21 +49,24 @@ def main(gear_context):
                 "you know what you are asking for. "
                 "Continuing."
             )
-            nifti_files = None
+            output_image_files = None
 
-    # Apply coil combined method
-    if gear_context.config["coil_combine"]:
-        dcm2niix_utils.coil_combine(nifti_files)
+    # NIfTI files are assumed to be expected for coil combined and pydeface
+    if not gear_context.config["output_nrrd"]:
 
-    # Run pydeface
-    if gear_context.config["pydeface"]:
-        gear_args = parse_config.generate_gear_args(gear_context, "pydeface")
-        pydeface_run.deface_multiple_niftis(nifti_files, **gear_args)
+        # Apply coil combined method
+        if gear_context.config["coil_combine"]:
+            dcm2niix_utils.coil_combine(output_image_files)
+
+        # Run pydeface
+        if gear_context.config["pydeface"]:
+            gear_args = parse_config.generate_gear_args(gear_context, "pydeface")
+            pydeface_run.deface_multiple_niftis(output_image_files, **gear_args)
 
     # Resolve gear outputs, including metadata capture
     gear_args = parse_config.generate_gear_args(gear_context, "resolve")
     resolve.setup(
-        nifti_files,
+        output_image_files,
         gear_context.work_dir,
         dcm2niix_input_dir,
         gear_context.output_dir,

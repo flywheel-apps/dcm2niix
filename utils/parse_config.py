@@ -64,22 +64,35 @@ def generate_gear_args(gear_context, FLAG):
     elif FLAG == "dcm2niix":
 
         # Notice the explicit 'y' for bids_sidecar, in order to capture metadata; the
-        # user-defined config option setting wil be considered during gear resolve.
+        # user-defined config option setting wil be considered during the gear resolve stage.
+        filename = gear_context.config["filename"]
+        filename = filename.replace(" ", "_")
+
+        comment = gear_context.config["comment"]
+        if len(comment) > 24:
+            log.error(
+                f"The comment configuration option must be less than 25 characters. You have entered {len(comment)} characters. Please edit and resubmit Gear. Exiting."
+            )
+            os.sys.exit(1)
+
         gear_args = {
             "anonymize_bids": gear_context.config["anonymize_bids"],
             "bids_sidecar": "y",
+            "comment": comment,
             "compress_nifti": gear_context.config["compress_nifti"],
             "compression_level": gear_context.config["compression_level"],
             "convert_only_series": gear_context.config["convert_only_series"],
             "crop": gear_context.config["crop"],
-            "filename": gear_context.config["filename"],
+            "filename": filename,
             "ignore_derived": gear_context.config["ignore_derived"],
             "ignore_errors": gear_context.config["ignore_errors"],
             "lossless_scaling": gear_context.config["lossless_scaling"],
             "merge2d": gear_context.config["merge2d"],
+            "output_nrrd": gear_context.config["output_nrrd"],
             "philips_scaling": gear_context.config["philips_scaling"],
             "single_file_mode": gear_context.config["single_file_mode"],
             "text_notes_private": gear_context.config["text_notes_private"],
+            "verbose": gear_context.config["dcm2niix_verbose"],
         }
 
         # Anonymization cascade
@@ -129,6 +142,7 @@ def generate_gear_args(gear_context, FLAG):
             "ignore_errors": gear_context.config["ignore_errors"],
             "retain_sidecar": True,
             "retain_nifti": True,
+            "output_nrrd": gear_context.config["output_nrrd"],
             "pydeface_intermediaries": False,
             "classification": None,
             "modality": None,
@@ -142,6 +156,9 @@ def generate_gear_args(gear_context, FLAG):
 
         if gear_context.config["pydeface_nocleanup"]:
             gear_args["pydeface_intermediaries"] = True
+
+        if gear_context.config["output_nrrd"]:
+            gear_args["retain_nifti"] = False
 
         try:
             classification = (
