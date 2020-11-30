@@ -37,7 +37,9 @@ def generate_gear_args(gear_context, FLAG):
                             f"{infile} opened from path separated dcm2niix_input."
                         )
                 except FileNotFoundError:
-                    log.error("Unable to open dcm2niix_input. Exiting.")
+                    log.error(
+                        "Filename not understood from Gear context. Unable to open dcm2niix_input. Exiting."
+                    )
                     os.sys.exit(1)
 
         gear_args = {
@@ -79,7 +81,7 @@ def generate_gear_args(gear_context, FLAG):
             "anonymize_bids": gear_context.config["anonymize_bids"],
             "bids_sidecar": "y",
             "comment": comment,
-            "compress_nifti": gear_context.config["compress_nifti"],
+            "compress_images": gear_context.config["compress_images"],
             "compression_level": gear_context.config["compression_level"],
             "convert_only_series": gear_context.config["convert_only_series"],
             "crop": gear_context.config["crop"],
