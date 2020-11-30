@@ -6,19 +6,23 @@ categories:
       - 'feature'
       - 'enhancement'
       - 'enh'
+      - 'ENH'
   - title: 'Fixes'
     labels:
       - 'fix'
       - 'bugfix'
       - 'bug'
+      - 'BUG'
   - title: 'Documentation'
     labels:
       - 'doc'
       - 'documentation'
+      - 'DOC'
   - title: 'Maintenance'
     labels:
       - 'chore'
       - 'maintenance'
+      - 'MAIN'
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 template: |
   _[ADD SUMMARY OF WHAT CHANGED]_
