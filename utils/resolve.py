@@ -1,5 +1,5 @@
 """Functions to resolve dcm2niix gear outputs."""
-# ENH: refactor script to make more explicit on output image formats and black compatible throughout, if possible.
+# ENH: refactor script to move in the other direction, from list of BIDS sidecars to associated images, to make the logic more explicit
 
 import glob
 import logging
@@ -152,7 +152,7 @@ def retain_gear_outputs(
         if retain_sidecar and not file.endswith(".nhdr"):
             bids_sidecar = os.path.join(
                                         work_dir, re.sub(
-                                                         r"(\.nii\.gz|\.nii|.nhdr|\.raw\.gz)",
+                                                         r"(\.nii\.gz|\.nii|.nhdr|\.raw\.gz|\.nrrd)",
                                                          ".json",
                                                          os.path.basename(file))
             )

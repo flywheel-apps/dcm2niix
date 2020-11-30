@@ -69,7 +69,7 @@ def generate(
         # Capture the path to associated sidecar
         sidecar = os.path.join(
                                work_dir, re.sub(
-                                                r"(\.nii\.gz|\.nii|\.nhdr|\.raw\.gz)",
+                                                r"(\.nii\.gz|\.nii|\.nhdr|\.raw\.gz|\.nrrd)",
                                                 ".json",
                                                 os.path.basename(file))
         )
@@ -146,7 +146,7 @@ def generate(
 
         # Apply collated metadata to all associated files
 
-        # Sidecar; if NRRD format, two files per sidecar - capture sidecar once
+        # Sidecar; if NRRD format and compressed output configuration, two files per sidecar - capture sidecar once
         if retain_sidecar and not file.endswith(".nhdr"):
             filedata = create_file_metadata(
                                             sidecar,
