@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Generate file metadata from dcm2niix output."""
 
 import json
@@ -74,7 +75,8 @@ def generate(
                                                 os.path.basename(file))
         )
 
-        with open(sidecar) as sidecar_file:
+        with open(sidecar, encoding='utf-8') as sidecar_file:
+
             sidecar_info = json.load(sidecar_file, strict=False)
 
             # Capture the fields required to select a single DICOM for metadata
