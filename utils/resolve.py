@@ -1,5 +1,4 @@
 """Functions to resolve dcm2niix gear outputs."""
-# ENH: refactor script to move in the other direction, from list of BIDS sidecars to associated images, to make the logic more explicit
 
 import glob
 import logging
