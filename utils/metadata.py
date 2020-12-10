@@ -54,9 +54,12 @@ def generate(
     """
     log.info("Generating metadata.")
 
-    if retain_nifti == output_nrrd:
+    if (retain_nifti and output_nrrd) or (
+        not retain_nifti and not output_nrrd and not retain_sidecar
+    ):
         log.critical(
-            "Function arguments retain_nifti and output_nrrd are exclusive. Gear config logic is broken. Exiting."
+            "Function arguments retain_nifti and output_nrrd are exclusive. "
+            "Gear config logic is broken. Exiting."
         )
         os.sys.exit(1)
 
