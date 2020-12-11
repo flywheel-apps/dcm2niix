@@ -1,6 +1,6 @@
 """Run two versions of the dcm2niix Gear on the same inputs and capture resulting job information."""
 
-versions = ["1.0.0_1.0.20200331", "1.1.0_1.0.20201102_dev1"]
+versions = ["1.0.0_1.0.20200331", "1.2.0_1.0.20201102_dev3"]
 output_dir = "~/Documents/flywheel/gears/dcm2niix/tests/instance"
 
 import time

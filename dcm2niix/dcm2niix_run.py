@@ -17,7 +17,7 @@ def convert_directory(
     anonymize_bids=True,
     bids_sidecar="y",
     comment="",
-    compress_nifti="y",
+    compress_images="y",
     compression_level=6,
     convert_only_series="all",
     crop=False,
@@ -44,11 +44,11 @@ def convert_directory(
             (whereby no NIfTI file will be generated).
         comment (str): If non-empty, store comment as NIfTI aux_file
             (up to 24 characters).
-        compress_nifti (str): Compress output NIfTI file; 'y'=yes, 'i'=internal,
+        compress_images (str): Gzip compress images; 'y'=yes, 'i'=internal,
             'n'=no, '3'=no,3D. If option '3' is chosen, the filename flag will
             be set to '-f %p_%s' to prevent overwriting files.
-        compression_level (int): Set the gz compression level: 1 (fastest) to
-            9 (smallest).
+        compression_level (int): If compressing images, set the gz compression
+            level: 1 (fastest) to 9 (smallest).
         convert_only_series (str): Space-separated list of series numbers to convert or
             default 'all'. WARNING: Expert Option.
         crop (bool): If true, crop 3D T1 images.
@@ -99,28 +99,28 @@ def convert_directory(
             converter.inputs.comment = comment
 
         # dcm2niix command configurations for: compress nifti
-        if str(compress_nifti) == "3":
+        if str(compress_images) == "3":
             log.info(
                 "Outputs will be saved as uncompressed 3D volumes. \
                        \nFilename will be set to %p_%s to prevent overwritting files."
             )
             filename = "%p_%s"
 
-        if str(compress_nifti) in ["y", "i", "n", "3"]:
-            converter.inputs.compress = str(compress_nifti)
+        if str(compress_images) in ["y", "i", "n", "3"]:
+            converter.inputs.compress = str(compress_images)
 
-        # dcm2niix command configurations for: compression_level
-        if (
-            (compression_level > 0)
-            and (compression_level < 10)
-            and isinstance(compression_level, int)
-        ):
-            converter.inputs.compression = compression_level
-        else:
-            log.error(
-                "Configuration option error: compression_level must be between 1 and 9. Exiting."
-            )
-            os.sys.exit(1)
+            # dcm2niix command configurations for: compression_level
+            if (
+                (compression_level > 0)
+                and (compression_level < 10)
+                and isinstance(compression_level, int)
+            ):
+                converter.inputs.compression = compression_level
+            else:
+                log.error(
+                    "Configuration option error: compression_level must be between 1 and 9. Exiting."
+                )
+                os.sys.exit(1)
 
         # dcm2niix command configurations for: convert_only_series
         if convert_only_series != "all":
@@ -171,20 +171,27 @@ def convert_directory(
 
         log.info(f"Output from dcm2niix: \n\n{output.runtime.stdout }\n")
 
-        # If error from dcm2niix software, then raise exception
+        # If error from dcm2niix tool, then raise exception
         if int(output.runtime.returncode) == 1:
-            raise Exception("The dcm2niix software pacakage returned an error.")
+            raise Exception("The dcm2niix software tool returned an error.")
         else:
             log.info("Finished dcm2niix conversion.")
 
     except Exception as e:
 
-        log.error("Did not complete dcm2niix conversion. Exiting.")
+        log.error("Did not complete dcm2niix conversion properly.")
         log.exception(e, exc_info=False)
-        output = None
 
         # dcm2niix command configurations for: ignore_errors
         if not ignore_errors:
+            log.error("Exiting.")
             os.sys.exit(1)
+        else:
+            log.warning(
+                "Expert Option (ignore_errors). "
+                "We trust that since you have selected this option "
+                "you know what you are asking for. "
+                "Continuing."
+            )
 
     return output

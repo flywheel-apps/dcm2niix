@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Main script for dcm2niix gear."""
-# MAIN: cleanse and collate logic on ignore errors and empty image output scenarios
-
-import os
 
 import flywheel_gear_toolkit
 
@@ -28,31 +25,19 @@ def main(gear_context):
         dcm2niix_input_dir, gear_context.work_dir, **gear_args
     )
 
-    # Nipype interface output from dcm2niix can be a string or list (desired)
-    if output is not None:
+    try:
+        # Nipype interface output from dcm2niix can be a string or list (desired)
         output_image_files = output.outputs.converted_files
 
         if isinstance(output_image_files, str):
             output_image_files = [output_image_files]
-    else:
+
+    except AttributeError:
+        log.info("No outputs were produced from dcm2niix tool.")
         output_image_files = None
 
-    if not isinstance(output_image_files, list):
-        if not gear_context.config["ignore_errors"]:
-            log.error("NIfTIs not produced from dcm2niix conversion. Exiting.")
-            os.sys.exit(1)
-        else:
-            log.warning(
-                "NIfTIs not produced from dcm2niix conversion."
-                "Expert Option (ignore_errors). "
-                "We trust that since you have selected this option "
-                "you know what you are asking for. "
-                "Continuing."
-            )
-            output_image_files = None
-
     # NIfTI files are assumed to be expected for coil combined and pydeface
-    if not gear_context.config["output_nrrd"]:
+    if not gear_context.config["output_nrrd"] and output_image_files is not None:
 
         # Apply coil combined method
         if gear_context.config["coil_combine"]:

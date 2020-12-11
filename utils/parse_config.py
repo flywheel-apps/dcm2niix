@@ -19,8 +19,8 @@ def generate_gear_args(gear_context, FLAG):
         try:
             with open(infile, "r") as f:
                 log.debug(f"{infile} opened from dcm2niix_input.")
-        except FileNotFoundError:
 
+        except FileNotFoundError:
             # Path separation in filename may cause downloaded filename to be altered
             filename = (
                 gear_context.config_json.get("inputs", {})
@@ -37,8 +37,22 @@ def generate_gear_args(gear_context, FLAG):
                             f"{infile} opened from path separated dcm2niix_input."
                         )
                 except FileNotFoundError:
-                    log.error("Unable to open dcm2niix_input. Exiting.")
+                    log.info(
+                        f"Path to dcm2niix_input: {gear_context.get_input_path('dcm2niix_input')}"
+                    )
+                    log.error(
+                        "Filename not understood from Gear context. Unable to open dcm2niix_input. Exiting."
+                    )
                     os.sys.exit(1)
+
+        except UnicodeEncodeError:
+            log.info(
+                f"Path to dcm2niix_input: {gear_context.get_input_path('dcm2niix_input')}"
+            )
+            log.error(
+                "Filename not understood from Gear context. Unable to open dcm2niix_input. Exiting."
+            )
+            os.sys.exit(1)
 
         gear_args = {
             "infile": infile,
@@ -54,7 +68,7 @@ def generate_gear_args(gear_context, FLAG):
 
             rec_infile = Path(gear_context.get_input_path("rec_file_input"))
             if rec_infile.is_file():
-                gear_args["rec_infile"] = rec_infile
+                gear_args["rec_infile"] = str(rec_infile)
             else:
                 log.error(
                     "Configuration for rec_infile_input is not a valid path. Exiting."
@@ -79,7 +93,7 @@ def generate_gear_args(gear_context, FLAG):
             "anonymize_bids": gear_context.config["anonymize_bids"],
             "bids_sidecar": "y",
             "comment": comment,
-            "compress_nifti": gear_context.config["compress_nifti"],
+            "compress_images": gear_context.config["compress_images"],
             "compression_level": gear_context.config["compression_level"],
             "convert_only_series": gear_context.config["convert_only_series"],
             "crop": gear_context.config["crop"],

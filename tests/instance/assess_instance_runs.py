@@ -3,7 +3,7 @@ import datetime
 import flywheel
 import pandas as pd
 
-versions = ["1.0.0_1.0.20200331", "1.1.0_1.0.20201102_dev1"]
+versions = ["1.0.0_1.0.20200331", "1.2.0_1.0.20201102_dev3"]
 
 
 input_dir = "~/Documents/flywheel/gears/dcm2niix/tests/instance"
@@ -28,8 +28,14 @@ compare = compare[
 
 fw = flywheel.Client()
 
-job_id = ""
-job_logs = fw.get_job_logs(job_id)
+for index, row in compare.iterrows():
+
+    if row["state_y"] == "failed":
+        job_id = row["job_id_y"]
+        job_logs = fw.get_job_logs(job_id)
+        print(job_logs.logs[-4:])
+        print("=================\n\n")
+
 with open("logfile.txt", "w") as logfile:
     for log in job_logs["logs"]:
         logfile.write(log["msg"].rstrip())
