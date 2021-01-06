@@ -222,9 +222,9 @@ def capture(
         for file in output_image_files:
 
             if Path(sidecar).stem in Path(file).stem:
-                
+
                 file_type = "".join(Path(file).suffixes)
-                
+
                 if retain_nifti:
 
                     # NIfTI

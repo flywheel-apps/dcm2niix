@@ -166,7 +166,7 @@ def retain_gear_outputs(
             if Path(sidecar).stem in Path(file).stem:
 
                 file_type = "".join(Path(file).suffixes)
-                
+
                 if retain_nifti:
                     if file_type in [".nii.gz", ".nii", ".bval", ".bvec"]:
                         log.info(f"Moving {file} to output directory.")
