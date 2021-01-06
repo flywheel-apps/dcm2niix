@@ -19,7 +19,7 @@ def generate(
     output_sidecar_files,
     work_dir,
     dcm2niix_input_dir=None,
-    retain_sidecar=True,
+    retain_sidecar=False,
     retain_nifti=True,
     output_nrrd=False,
     pydeface_intermediaries=False,
@@ -221,26 +221,28 @@ def capture(
         # Data files
         for file in output_image_files:
 
-            if Path(file).stem == Path(sidecar).stem:
-
+            if Path(sidecar).stem in Path(file).stem:
+                
+                file_type = "".join(Path(file).suffixes)
+                
                 if retain_nifti:
 
                     # NIfTI
-                    if Path(file).suffix in [".nii.gz", ".nii"]:
+                    if file_type in [".nii.gz", ".nii"]:
                         filedata = create_file_metadata(
                             file, "nifti", classification, metadata, modality
                         )
                         capture_metadata.append(filedata)
 
                     # bval
-                    if Path(file).suffix in [".bval"]:
+                    if file_type in [".bval"]:
                         filedata = create_file_metadata(
                             file, "bval", classification, metadata, modality
                         )
                         capture_metadata.append(filedata)
 
                     # bvec
-                    if Path(file).suffix in [".bvec"]:
+                    if file_type in [".bvec"]:
                         filedata = create_file_metadata(
                             file, "bvec", classification, metadata, modality
                         )
@@ -249,7 +251,7 @@ def capture(
                 if output_nrrd:
 
                     # NRRD
-                    if Path(file).suffix in [".raw", ".nhdr", ".nrrd"]:
+                    if file_type in [".raw", ".nhdr", ".nrrd"]:
                         filedata = create_file_metadata(
                             file, "nrrd", classification, metadata, modality
                         )

@@ -18,7 +18,7 @@ def setup(
     dcm2niix_input_dir,
     output_dir,
     ignore_errors=False,
-    retain_sidecar=True,
+    retain_sidecar=False,
     retain_nifti=True,
     output_nrrd=False,
     pydeface_intermediaries=False,
@@ -158,21 +158,23 @@ def retain_gear_outputs(
         # Move bids json sidecar file, if indicated
         if retain_sidecar:
             shutil.move(sidecar, output_dir)
-            log.info(f"Moving {Path(sidecar).stem} to output directory.")
+            log.info(f"Moving {sidecar} to output directory.")
 
         # Move data files, if indicated
         for file in output_image_files:
 
-            if Path(file).stem == Path(sidecar).stem:
+            if Path(sidecar).stem in Path(file).stem:
 
+                file_type = "".join(Path(file).suffixes)
+                
                 if retain_nifti:
-                    if Path(file).suffix in [".nii.gz", ".nii", ".bval", ".bvec"]:
-                        log.info(f"Moving {Path(file).stem} to output directory.")
+                    if file_type in [".nii.gz", ".nii", ".bval", ".bvec"]:
+                        log.info(f"Moving {file} to output directory.")
                         shutil.move(file, output_dir)
 
                 if output_nrrd:
-                    if Path(file).suffix in [".raw", ".nhdr", ".nrrd"]:
-                        log.info(f"Moving {Path(file).stem} to output directory.")
+                    if file_type in [".raw", ".nhdr", ".nrrd"]:
+                        log.info(f"Moving {file} to output directory.")
                         shutil.move(file, output_dir)
 
         # PyDeface files
