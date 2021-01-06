@@ -251,7 +251,7 @@ def capture(
                 if output_nrrd:
 
                     # NRRD
-                    if file_type in [".raw", ".nhdr", ".nrrd"]:
+                    if file_type in [".raw.gz", ".nhdr", ".nrrd"]:
                         filedata = create_file_metadata(
                             file, "nrrd", classification, metadata, modality
                         )

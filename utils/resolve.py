@@ -173,7 +173,7 @@ def retain_gear_outputs(
                         shutil.move(file, output_dir)
 
                 if output_nrrd:
-                    if file_type in [".raw", ".nhdr", ".nrrd"]:
+                    if file_type in [".raw.gz", ".nhdr", ".nrrd"]:
                         log.info(f"Moving {file} to output directory.")
                         shutil.move(file, output_dir)
 
