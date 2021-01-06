@@ -5,7 +5,6 @@ import json
 import logging
 import os
 import pprint
-import re
 from pathlib import Path
 
 import pydicom
@@ -17,6 +16,7 @@ log = logging.getLogger(__name__)
 
 def generate(
     output_image_files,
+    output_sidecar_files,
     work_dir,
     dcm2niix_input_dir=None,
     retain_sidecar=True,
@@ -33,9 +33,12 @@ def generate(
         configuration settings.
 
     Args:
-        output_image_files (list): The absolute paths to gear image files to resolve.
+        output_image_files (list): The absolute paths to converted image files to resolve.
             Typically these are NIfTI files, but can be the two files constituting the
-            NRRD format (i.e., ".raw" and ".nhdr").
+            NRRD format (i.e., ".raw" and ".nhdr") or the NRRD format (i.e., ".nrrd").
+            Also contains ".bvals" and ".bvecs", if applicable.
+        output_sidecar_files (list): The absolute paths to the sidecar files to be
+            used as metadata on all files in the output_image_files input list.
         work_dir (str): The absolute path to the output directory of dcm2niix and where
             the metadata file generated is written to.
         dcm2niix_input_dir (str): The absolute path to a set of dicoms as input
@@ -53,7 +56,71 @@ def generate(
         metadata_file (str): The absolute path to the metadata file generated.
 
     """
-    log.info("Generating metadata.")
+    metadata = capture(
+        output_image_files,
+        output_sidecar_files,
+        work_dir,
+        dcm2niix_input_dir=dcm2niix_input_dir,
+        retain_sidecar=retain_sidecar,
+        retain_nifti=retain_nifti,
+        output_nrrd=output_nrrd,
+        pydeface_intermediaries=pydeface_intermediaries,
+        classification=classification,
+        modality=modality,
+    )
+
+    metadata_file = create_file(metadata, work_dir)
+
+    log.info("Metadata generation completed successfully.")
+    metadata_formatted = pprint.pformat(metadata)
+    log.info(f"Metadata contents: \n\n{metadata_formatted}\n")
+
+    return metadata_file
+
+
+def capture(
+    output_image_files,
+    output_sidecar_files,
+    work_dir,
+    dcm2niix_input_dir=None,
+    retain_sidecar=True,
+    retain_nifti=True,
+    output_nrrd=False,
+    pydeface_intermediaries=False,
+    classification=None,
+    modality=None,
+):
+    """Capture file metadata for each dcm2niix output.
+
+        Using the BIDS json sidecar output from dcm2niix, generate file metadata
+        (file.info) and set the classification (file.measurements) from the input
+        configuration settings.
+
+    Args:
+        output_image_files (list): The absolute paths to converted image files to resolve.
+            Typically these are NIfTI files, but can be the two files constituting the
+            NRRD format (i.e., ".raw" and ".nhdr") or the NRRD format (i.e., ".nrrd").
+            Also contains ".bvals" and ".bvecs", if applicable.
+        output_sidecar_files (list): The absolute paths to the sidecar files to be
+            used as metadata on all files in the output_image_files input list.
+        work_dir (str): The absolute path to the output directory of dcm2niix and where
+            the metadata file generated is written to.
+        dcm2niix_input_dir (str): The absolute path to a set of dicoms as input
+            to dcm2niix.
+        retain_sidecar (bool): If true, sidecar is retained in final output.
+        retain_nifti (bool): If true, nifti is retained in final output.
+        output_nrrd (bool): If true, export as NRRD instead of NIfTI.
+        pydeface_intermediaries (bool): If True, pydeface intermediary files are
+            retained. The files created when --nocleanup flag is applied to the
+            pydeface command.
+        classification (dict): File classification, typically from gear config.
+        modality (str): File modality, typically from gear config.
+
+    Returns:
+        metadata (dict): Structured metadata information for a given file set.
+
+    """
+    log.info("Capturing metadata.")
 
     if (retain_nifti and output_nrrd) or (
         not retain_nifti and not output_nrrd and not retain_sidecar
@@ -66,19 +133,11 @@ def generate(
 
     capture_metadata = []
 
-    # fmt: off
-    # Append metadata from dicom header and from the associated bids sidecar
-    for file in output_image_files:
+    # Collate metadata from dicom header and from the associated bids sidecar
 
-        # Capture the path to associated sidecar
-        sidecar = os.path.join(
-                               work_dir, re.sub(
-                                                r"(\.nii\.gz|\.nii|\.nhdr|\.raw\.gz|\.nrrd)",
-                                                ".json",
-                                                os.path.basename(file))
-        )
+    for sidecar in output_sidecar_files:
 
-        with open(sidecar, encoding='utf-8') as sidecar_file:
+        with open(sidecar, encoding="utf-8") as sidecar_file:
 
             sidecar_info = json.load(sidecar_file, strict=False)
 
@@ -86,11 +145,11 @@ def generate(
             try:
                 series_description = sidecar_info["SeriesDescription"]
             except KeyError:
-                series_description = ''
+                series_description = ""
             try:
                 series_number = str(sidecar_info["SeriesNumber"])
             except KeyError:
-                series_number = ''
+                series_number = ""
 
             # Retain the modality set in the config; otherwise, replace with sidecar
             # captured modality determined via dcm2niix and if neither modality set
@@ -148,115 +207,72 @@ def generate(
 
         # Collate metadata from dicom header and dcm2niix sidecar into one dictionary
         metadata = {**sidecar_info, **dicom_data}
+        log.debug("Structured metadata captured.")
 
         # Apply collated metadata to all associated files
 
-        # Sidecar; if NRRD format and compressed output configuration, two files per sidecar - capture sidecar once
-        if retain_sidecar and not file.endswith(".nhdr"):
+        # Sidecar file
+        if retain_sidecar:
             filedata = create_file_metadata(
-                                            sidecar,
-                                            "source code",
-                                            classification,
-                                            metadata,
-                                            modality
+                sidecar, "source code", classification, metadata, modality
             )
             capture_metadata.append(filedata)
 
-        # NIfTI
-        if retain_nifti and not output_nrrd:
-            filedata = create_file_metadata(
-                                            file,
-                                            "nifti",
-                                            classification,
-                                            metadata,
-                                            modality
-            )
-            capture_metadata.append(filedata)
+        # Data files
+        for file in output_image_files:
 
-            bval = os.path.join(
-                                work_dir, re.sub(
-                                                 r"(\.nii\.gz|\.nii)",
-                                                 ".bval",
-                                                 os.path.basename(file))
-            )
+            if Path(file).stem == Path(sidecar).stem:
 
-            if os.path.isfile(bval):
+                if retain_nifti:
+
+                    # NIfTI
+                    if Path(file).suffix in [".nii.gz", ".nii"]:
+                        filedata = create_file_metadata(
+                            file, "nifti", classification, metadata, modality
+                        )
+                        capture_metadata.append(filedata)
+
+                    # bval
+                    if Path(file).suffix in [".bval"]:
+                        filedata = create_file_metadata(
+                            file, "bval", classification, metadata, modality
+                        )
+                        capture_metadata.append(filedata)
+
+                    # bvec
+                    if Path(file).suffix in [".bvec"]:
+                        filedata = create_file_metadata(
+                            file, "bvec", classification, metadata, modality
+                        )
+                        capture_metadata.append(filedata)
+
+                if output_nrrd:
+
+                    # NRRD
+                    if Path(file).suffix in [".raw", ".nhdr", ".nrrd"]:
+                        filedata = create_file_metadata(
+                            file, "nrrd", classification, metadata, modality
+                        )
+                        capture_metadata.append(filedata)
+
+        # PyDeface files
+        if pydeface_intermediaries:
+
+            # The output mask of PyDeface is a compressed nifti, even if .nii input
+            file = os.path.join(work_dir, f"{Path(sidecar).stem}_pydeface_mask.nii.gz")
+            if os.path.isfile(file):
                 filedata = create_file_metadata(
-                                                bval,
-                                                "bval",
-                                                classification,
-                                                metadata,
-                                                modality
-                )
-            capture_metadata.append(filedata)
-
-            bvec = os.path.join(
-                                work_dir, re.sub(
-                                                 r"(\.nii\.gz|\.nii)",
-                                                 ".bvec",
-                                                 os.path.basename(file))
-            )
-
-            if os.path.isfile(bvec):
-                filedata = create_file_metadata(
-                                                bvec,
-                                                "bvec",
-                                                classification,
-                                                metadata,
-                                                modality
+                    file, "nifti", classification, metadata, modality
                 )
                 capture_metadata.append(filedata)
 
-            if pydeface_intermediaries:
-
-                # The output mask of PyDeface is a compressed nifti, even if .nii input
-                pydeface_mask = os.path.join(
-                                             work_dir, re.sub(
-                                                              r"(\.nii\.gz|\.nii)",
-                                                              "_pydeface_mask.nii.gz",
-                                                              os.path.basename(file))
+            file = os.path.join(work_dir, f"{Path(sidecar).stem}_pydeface.mat")
+            if os.path.isfile(file):
+                filedata = create_file_metadata(
+                    file, "MATLAB data", classification, metadata, modality
                 )
+                capture_metadata.append(filedata)
 
-                if os.path.isfile(pydeface_mask):
-                    filedata = create_file_metadata(
-                                                    pydeface_mask,
-                                                    "nifti",
-                                                    classification,
-                                                    metadata,
-                                                    modality
-                    )
-                    capture_metadata.append(filedata)
-
-                pydeface_matlab = os.path.join(
-                                               work_dir, re.sub(
-                                                                r"(\.nii\.gz|\.nii)",
-                                                                "_pydeface.mat",
-                                                                os.path.basename(file))
-                )
-
-                if os.path.isfile(pydeface_matlab):
-                    filedata = create_file_metadata(
-                                                    pydeface_matlab,
-                                                    "MATLAB data",
-                                                    classification,
-                                                    metadata,
-                                                    modality,
-                    )
-                    capture_metadata.append(filedata)
-
-        # NRRD
-        if output_nrrd and not retain_nifti:
-
-            filedata = create_file_metadata(
-                                            file,
-                                            "nrrd",
-                                            classification,
-                                            metadata,
-                                            modality
-            )
-            capture_metadata.append(filedata)
-
-    # fmt: on
     # If modality is not set, remove modality and classification from the metadata file
     if modality is None:
         for file in capture_metadata:
@@ -275,15 +291,8 @@ def generate(
     metadata = {}
     metadata["acquisition"] = {}
     metadata["acquisition"]["files"] = capture_metadata
-    metadata_file = os.path.join(work_dir, ".metadata.json")
-    with open(metadata_file, "w") as file_obj:
-        json.dump(metadata, file_obj)
 
-    log.info("Metadata generation completed successfully.")
-    metadata_formatted = pprint.pformat(metadata)
-    log.info(f"Metadata contents: \n\n{metadata_formatted}\n")
-
-    return metadata_file
+    return metadata
 
 
 def dicom_metadata_extraction(dicom_header):
@@ -408,3 +417,33 @@ def create_file_metadata(filename, filetype, classification, bids_info, modality
     filedata["modality"] = modality
 
     return filedata
+
+
+def serialize_bytes(obj):
+    if isinstance(obj, bytes):
+
+        try:
+            obj = obj.decode("utf-8")
+        except UnicodeDecodeError:
+
+            try:
+                obj = obj.decode("latin-1")
+            except TypeError:
+                log.critical(
+                    "Unable to decode JSON sidecar produced by the dcm2niix tool. Exiting."
+                )
+                os.sys.exit(1)
+
+    return obj
+
+
+def create_file(metadata, work_dir):
+    """Create metadata file and return path to the created file."""
+    log.info("Creating metadata file.")
+
+    metadata_file = os.path.join(work_dir, ".metadata.json")
+    with open(metadata_file, "w") as file_obj:
+        json.dump(metadata, file_obj, default=serialize_bytes)
+
+    log.info("Metadata file created.")
+    return metadata_file

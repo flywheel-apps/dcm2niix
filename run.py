@@ -25,12 +25,16 @@ def main(gear_context):
         dcm2niix_input_dir, gear_context.work_dir, **gear_args
     )
 
+    # Nipype interface output from dcm2niix can be a string or list (desired)
     try:
-        # Nipype interface output from dcm2niix can be a string or list (desired)
-        output_image_files = output.outputs.converted_files
 
+        output_image_files = output.outputs.converted_files
         if isinstance(output_image_files, str):
             output_image_files = [output_image_files]
+
+        output_sidecar_files = output.outputs.bids
+        if isinstance(output_sidecar_files, str):
+            output_sidecar_files = [output_sidecar_files]
 
     except AttributeError:
         log.info("No outputs were produced from dcm2niix tool.")
@@ -48,11 +52,25 @@ def main(gear_context):
             gear_args = parse_config.generate_gear_args(gear_context, "pydeface")
             pydeface_run.deface_multiple_niftis(output_image_files, **gear_args)
 
+    # If bvals or bvecs defined, then add to the list of output image files
+    if isinstance(output.outputs.bvals, str):
+        output_image_files.append(output.outputs.bvals)
+
+    if isinstance(output.outputs.bvals, list):
+        output_image_files.extend(output.outputs.bvals)
+
+    if isinstance(output.outputs.bvecs, str):
+        output_image_files.append(output.outputs.bvecs)
+
+    if isinstance(output.outputs.bvecs, list):
+        output_image_files.extend(output.outputs.bvecs)
+
     # Resolve gear outputs, including metadata capture
     gear_args = parse_config.generate_gear_args(gear_context, "resolve")
     resolve.setup(
         output_image_files,
-        gear_context.work_dir,
+        output_sidecar_files,
+        str(gear_context.work_dir),
         dcm2niix_input_dir,
         gear_context.output_dir,
         **gear_args,
