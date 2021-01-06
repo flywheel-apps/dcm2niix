@@ -18,7 +18,7 @@ def generate_gear_args(gear_context, FLAG):
         infile = gear_context.get_input_path("dcm2niix_input")
         try:
             with open(infile, "r") as f:
-                log.debug(f"{infile} opened from dcm2niix_input.")
+                log.debug(f"{f} opened from dcm2niix_input.")
 
         except FileNotFoundError:
             # Path separation in filename may cause downloaded filename to be altered
@@ -32,7 +32,7 @@ def generate_gear_args(gear_context, FLAG):
                 infile = f"/flywheel/v0/input/dcm2niix_input/{filename.split('/')[-1]}"
 
                 try:
-                    with open(infile, "r") as f:
+                    with open(infile, "r"):
                         log.debug(
                             f"{infile} opened from path separated dcm2niix_input."
                         )
