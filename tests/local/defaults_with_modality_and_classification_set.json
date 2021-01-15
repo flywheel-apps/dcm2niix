@@ -1,0 +1,77 @@
+{
+ "config": {
+      "anonymize_bids": true,
+      "bids_sidecar": "n",
+      "coil_combine": false,
+      "comment": "",
+      "compress_images": "y",
+      "compression_level": 6,
+      "convert_only_series": "all",
+      "crop": false,
+      "dcm2niix_verbose": false,
+      "decompress_dicoms": false,
+      "filename": "%f",
+      "ignore_derived": false,
+      "ignore_errors": false,
+      "lossless_scaling": "n",
+      "merge2d": false,
+      "output_nrrd": false,
+      "philips_scaling": true,
+      "pydeface": false,
+      "pydeface_cost": "mutualinfo",
+      "pydeface_nocleanup": false,
+      "pydeface_verbose": false,
+      "remove_incomplete_volumes": false,
+      "single_file_mode": false,
+      "text_notes_private": false
+  },
+  "inputs": {
+      "dcm2niix_input": {
+            "base": "file",
+            "hierarchy": {
+                "id": "123abc",
+                "type": "acquisition"
+            },
+            "location": {
+                "name": "images.zip",
+                "path": "/flywheel/v0/input/scan_file/images.zip"
+            },
+            "object": {
+                "classification": {
+                    "Custom": [],
+                    "Intent": [
+                        "Structural"
+                    ],
+                    "Measurement": [
+                        "T1"
+                    ]
+                },
+                "info": {},
+                "measurements": [
+                    "Structural",
+                    "T1"
+                ],
+                "mimetype": "application/zip",
+                "modality": "MR",
+                "size": 1234,
+                "tags": [],
+                "type": "dicom"
+            }
+      },
+      "rec_file_input": {
+          "base": "file",
+          "location": {"path": "",
+                       "name": ""}
+      },
+      "pydeface_template": {
+          "base": "file",
+          "location": {"path": "",
+                       "name": ""}
+      },
+      "pydeface_facemask": {
+          "base": "file",
+          "location": {"path": "",
+                       "name": ""}
+      }
+  }
+}

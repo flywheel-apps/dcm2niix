@@ -74,19 +74,19 @@ def deface_single_nifti(
     command = ["pydeface"]
 
     command.append("--outfile")
-    command.append(infile)
+    command.append(str(infile))
     command.append("--force")
 
     command.append("--cost")
-    command.append(pydeface_cost)
+    command.append(str(pydeface_cost))
 
     if template:
         command.append("--template")
-        command.append(template)
+        command.append(str(template))
 
     if facemask:
         command.append("--facemask")
-        command.append(facemask)
+        command.append(str(facemask))
 
     if pydeface_nocleanup:
         command.append("--nocleanup")
@@ -94,7 +94,7 @@ def deface_single_nifti(
     if pydeface_verbose:
         command.append("--verbose")
 
-    command.append(infile)
+    command.append(str(infile))
     log_command = " ".join(command)
     log.info(f"Command to be executed: \n\n{log_command}\n")
 

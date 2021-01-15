@@ -1,10 +1,9 @@
 """Functions to resolve dcm2niix gear outputs."""
 
-import glob
 import logging
 import os
-import re
 import shutil
+from pathlib import Path
 
 from utils import metadata
 
@@ -14,11 +13,12 @@ log = logging.getLogger(__name__)
 
 def setup(
     output_image_files,
+    output_sidecar_files,
     work_dir,
     dcm2niix_input_dir,
     output_dir,
     ignore_errors=False,
-    retain_sidecar=True,
+    retain_sidecar=False,
     retain_nifti=True,
     output_nrrd=False,
     pydeface_intermediaries=False,
@@ -28,9 +28,12 @@ def setup(
     """Orchestrate resolution of gear, including metadata capture and file retention.
 
     Args:
-        output_image_files (list): The absolute paths to gear image files to resolve.
+        output_image_files (list): The absolute paths to converted image files to resolve.
             Typically these are NIfTI files, but can be the two files constituting the
-            NRRD format (i.e., ".raw" and ".nhdr").
+            NRRD format (i.e., ".raw" and ".nhdr") or the NRRD format (i.e., ".nrrd").
+            Also contains ".bvals" and ".bvecs", if applicable.
+        output_sidecar_files (list): The absolute paths to the sidecar files to be
+            used as metadata on all files in the output_image_files input list.
         work_dir (str): The absolute path to the output directory of dcm2niix and where
             the metadata file generated is written to.
         dcm2niix_input_dir (str): The absolute path to the input directory to dcm2niix.
@@ -49,16 +52,14 @@ def setup(
     """
     # Ignoring errors configuration option; move all files from work_dir to output_dir
     if ignore_errors is True:
-        log.warning(
-            "Expert Option (ignore_errors). "
-            "We trust that since you have selected this option "
-            "you know what you are asking for. "
-            "Continuing."
-        )
+        log.warning("Applying Expert Option (ignore_errors).")
+
         if output_image_files is not None:
+
             # Capture metadata
             metadata_file = metadata.generate(
                 output_image_files,
+                output_sidecar_files,
                 work_dir,
                 dcm2niix_input_dir,
                 retain_sidecar=True,
@@ -69,10 +70,11 @@ def setup(
                 modality=modality,
             )
 
-        work_dir_contents = glob.glob(work_dir + "/*")
+        work_dir_contents = os.listdir(work_dir)
         for item in work_dir_contents:
-            if not os.path.isdir(item):
-                shutil.move(item, output_dir)
+            item_path = os.path.join(work_dir, item)
+            if not os.path.isdir(item_path):
+                shutil.move(item_path, output_dir)
                 log.info(f"Moving {item} to output directory for upload to Flywheel.")
 
     else:
@@ -80,6 +82,7 @@ def setup(
         # Capture metadata
         metadata_file = metadata.generate(
             output_image_files,
+            output_sidecar_files,
             work_dir,
             dcm2niix_input_dir,
             retain_sidecar=retain_sidecar,
@@ -93,6 +96,7 @@ def setup(
         # Retain gear outputs
         retain_gear_outputs(
             output_image_files,
+            output_sidecar_files,
             metadata_file,
             work_dir,
             output_dir,
@@ -105,6 +109,7 @@ def setup(
 
 def retain_gear_outputs(
     output_image_files,
+    output_sidecar_files,
     metadata_file,
     work_dir,
     output_dir,
@@ -116,9 +121,12 @@ def retain_gear_outputs(
     """Move selected gear outputs to the output directory.
 
     Args:
-        output_image_files (list): The absolute paths to gear image files to resolve.
+        output_image_files (list): The absolute paths to converted image files to resolve.
             Typically these are NIfTI files, but can be the two files constituting the
-            NRRD format (i.e., ".raw" and ".nhdr").
+            NRRD format (i.e., ".raw" and ".nhdr") or the NRRD format (i.e., ".nrrd").
+            Also contains ".bvals" and ".bvecs", if applicable.
+        output_sidecar_files (list): The absolute paths to the sidecar files to be
+            used as metadata on all files in the output_image_files input list.
         metadata_file (str): The absolute path to the metadata file.
         work_dir (str): The absolute path to the output directory of dcm2niix and
             where the generated metadata file is.
@@ -145,88 +153,46 @@ def retain_gear_outputs(
         )
         os.sys.exit(1)
 
-    # fmt: off
-
-    for file in output_image_files:
+    for sidecar in output_sidecar_files:
 
         # Move bids json sidecar file, if indicated
-        # If NRRD format, two files per sidecar - move sidecar once
-        if retain_sidecar and not file.endswith(".nhdr"):
-            bids_sidecar = os.path.join(
-                                        work_dir, re.sub(
-                                                         r"(\.nii\.gz|\.nii|.nhdr|\.raw\.gz|\.nrrd)",
-                                                         ".json",
-                                                         os.path.basename(file))
-            )
+        if retain_sidecar:
+            shutil.move(sidecar, output_dir)
+            log.info(f"Moving {sidecar} to output directory.")
 
-            shutil.move(bids_sidecar, output_dir)
-            log.info(f"Moving {bids_sidecar} to output directory.")
+        # Move data files, if indicated
+        for file in output_image_files:
 
-        # Move niftis and associated files (.bval, .bvec, .mat), if indicated
-        if retain_nifti and not output_nrrd:
+            if Path(sidecar).stem in Path(file).stem:
 
-            # Move bval file, if exists
-            bval = os.path.join(
-                                work_dir, re.sub(
-                                                 r"(\.nii\.gz|\.nii)",
-                                                 ".bval",
-                                                 os.path.basename(file))
-            )
+                file_type = "".join(Path(file).suffixes)
 
-            if os.path.isfile(bval):
-                shutil.move(bval, output_dir)
-                log.info(f"Moving {bval} to output directory.")
+                if retain_nifti:
+                    if file_type in [".nii.gz", ".nii", ".bval", ".bvec"]:
+                        log.info(f"Moving {file} to output directory.")
+                        shutil.move(file, output_dir)
 
-            # Move bvec file, if exists
-            bvec = os.path.join(
-                                work_dir, re.sub(
-                                                 r"(\.nii\.gz|\.nii)",
-                                                 ".bvec",
-                                                 os.path.basename(file))
-            )
+                if output_nrrd:
+                    if file_type in [".raw.gz", ".nhdr", ".nrrd"]:
+                        log.info(f"Moving {file} to output directory.")
+                        shutil.move(file, output_dir)
 
-            if os.path.isfile(bvec):
-                shutil.move(bvec, output_dir)
-                log.info(f"Moving {bvec} to output directory.")
+        # PyDeface files
+        if pydeface_intermediaries:
 
-            # Move pydeface intermediary files, if exists
-            if pydeface_intermediaries:
+            # The output mask of PyDeface is a compressed nifti, even if .nii input
+            file = os.path.join(work_dir, f"{Path(sidecar).stem}_pydeface_mask.nii.gz")
+            if os.path.isfile(file):
+                log.info(f"Moving {file} to output directory.")
+                shutil.move(file, output_dir)
 
-                # The output mask of PyDeface is a compressed nifti, even if .nii input
-                pydeface_mask = os.path.join(
-                                             work_dir, re.sub(
-                                                              r"(\.nii\.gz|\.nii)",
-                                                              "_pydeface_mask.nii.gz",
-                                                              os.path.basename(file))
-                )
-
-                if os.path.isfile(pydeface_mask):
-                    shutil.move(pydeface_mask, output_dir)
-                    log.info(f"Moving {pydeface_mask} to output directory.")
-
-                pydeface_matlab = os.path.join(
-                                               work_dir, re.sub(
-                                                                r"(\.nii\.gz|\.nii)",
-                                                                "_pydeface.mat",
-                                                                os.path.basename(file))
-                )
-
-                if os.path.isfile(pydeface_matlab):
-                    shutil.move(pydeface_matlab, output_dir)
-                    log.info(f"Moving {pydeface_matlab} to output directory.")
-
-            # Move nifti file
-            shutil.move(file, output_dir)
-            log.info(f"Moving {file} to output directory.")
-
-        # Move nrrd files
-        if output_nrrd and not retain_nifti:
-            shutil.move(file, output_dir)
-            log.info(f"Moving {file} to output directory.")
+            file = os.path.join(work_dir, f"{Path(sidecar).stem}_pydeface.mat")
+            if os.path.isfile(file):
+                log.info(f"Moving {file} to output directory.")
+                shutil.move(file, output_dir)
 
     # Move metadata file
     shutil.move(metadata_file, output_dir)
     log.info(f"Moving {metadata_file} to output directory.")
 
-    # fmt: on
     log.info("Gear outputs resolved.")

@@ -1,6 +1,6 @@
 """Run two versions of the dcm2niix Gear on the same inputs and capture resulting job information."""
 
-versions = ["1.0.0_1.0.20200331", "1.2.0_1.0.20201102_dev3"]
+versions = ["1.0.0_1.0.20200331", "1.2.1_1.0.20201102_dev1"]
 output_dir = "~/Documents/flywheel/gears/dcm2niix/tests/instance"
 
 import time
@@ -14,7 +14,7 @@ fw = flywheel.Client()
 def main():
 
     # Find the collection
-    collection = fw.collections.find_one(f"label=dcm2niix_rewrite_test")
+    collection = fw.collections.find_one("label=dcm2niix_rewrite_test")
 
     # Find all the acquisitions in the collection
     acquisitions = fw.get_collection_acquisitions(collection.id)
