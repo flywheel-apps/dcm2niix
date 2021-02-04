@@ -51,8 +51,6 @@ RUN chmod +x ${FLYWHEEL}/fix_dcm_vols.py
 
 # Copy in gear scripts
 COPY manifest.json ${FLYWHEEL}/manifest.json
-ADD dcm2niix ${FLYWHEEL}/dcm2niix
-ADD pydeface ${FLYWHEEL}/pydeface
-ADD utils ${FLYWHEEL}/utils
+ADD dcm2niix_gear ${FLYWHEEL}/dcm2niix_gear
 COPY run.py ${FLYWHEEL}/run.py
 RUN chmod +x ${FLYWHEEL}/run.py
