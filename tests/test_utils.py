@@ -3,7 +3,7 @@
 import pytest
 from pathlib import Path
 
-from dcm2niix import dcm2niix_utils
+from dcm2niix_gear.dcm2niix import dcm2niix_utils
 
 ASSETS_DIR = Path(__file__).parent / "assets"
 

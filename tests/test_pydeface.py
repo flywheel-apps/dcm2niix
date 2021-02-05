@@ -7,7 +7,7 @@ from pathlib import Path
 import nibabel as nb
 import numpy as np
 
-from pydeface import pydeface_run
+from dcm2niix_gear.pydeface import pydeface_run
 
 ASSETS_DIR = Path(__file__).parent / "assets"
 
@@ -20,8 +20,8 @@ def test_RunPydeface_WithInfile_Match():
 
     pydeface_run.deface_multiple_niftis([test_file])
 
-    valid_image = nb.load(valid_file).get_data()
-    test_image = nb.load(test_file).get_data()
+    valid_image = nb.load(valid_file).get_fdata()
+    test_image = nb.load(test_file).get_fdata()
     outcome = np.array_equal(valid_image, test_image)
 
     assert outcome is True
@@ -38,8 +38,8 @@ def test_RunPydeface_WithTemplate_Match():
 
     pydeface_run.deface_multiple_niftis([test_file], template=template_file)
 
-    valid_image = nb.load(valid_file).get_data()
-    test_image = nb.load(test_file).get_data()
+    valid_image = nb.load(valid_file).get_fdata()
+    test_image = nb.load(test_file).get_fdata()
     outcome = np.array_equal(valid_image, test_image)
 
     assert outcome is True
@@ -56,8 +56,8 @@ def test_RunPydeface_WithFacemask_Match():
 
     pydeface_run.deface_multiple_niftis([test_file], facemask=facemask_file)
 
-    valid_image = nb.load(valid_file).get_data()
-    test_image = nb.load(test_file).get_data()
+    valid_image = nb.load(valid_file).get_fdata()
+    test_image = nb.load(test_file).get_fdata()
     outcome = np.array_equal(valid_image, test_image)
 
     assert outcome is True
@@ -81,8 +81,8 @@ def test_RunPydeface_WithAllOptions_Match():
         pydeface_verbose=True,
     )
 
-    valid_image = nb.load(valid_file).get_data()
-    test_image = nb.load(test_file).get_data()
+    valid_image = nb.load(valid_file).get_fdata()
+    test_image = nb.load(test_file).get_fdata()
 
     outcome = np.array_equal(valid_image, test_image)
 

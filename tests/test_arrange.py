@@ -7,7 +7,7 @@ import tarfile
 import zipfile
 from pathlib import Path
 
-from dcm2niix import arrange
+from dcm2niix_gear.dcm2niix import arrange
 
 ASSETS_DIR = Path(__file__).parent / "assets"
 

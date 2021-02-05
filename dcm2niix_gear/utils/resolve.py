@@ -5,7 +5,7 @@ import os
 import shutil
 from pathlib import Path
 
-from utils import metadata
+from dcm2niix_gear.utils import metadata
 
 
 log = logging.getLogger(__name__)

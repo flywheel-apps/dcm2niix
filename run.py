@@ -4,12 +4,12 @@
 
 import flywheel_gear_toolkit
 
-from dcm2niix import prepare
-from dcm2niix import dcm2niix_utils
-from dcm2niix import dcm2niix_run
-from pydeface import pydeface_run
-from utils import parse_config
-from utils import resolve
+from dcm2niix_gear.dcm2niix import prepare
+from dcm2niix_gear.dcm2niix import dcm2niix_utils
+from dcm2niix_gear.dcm2niix import dcm2niix_run
+from dcm2niix_gear.pydeface import pydeface_run
+from dcm2niix_gear.utils import parse_config
+from dcm2niix_gear.utils import resolve
 
 
 def main(gear_context):
