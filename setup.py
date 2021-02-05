@@ -1,15 +1,19 @@
 """
-    dcm2niix-gear
+    fw-gear-dcm2niix
 """
+import json
 import setuptools
 
-VERSION = "1.2.2_1.0.20201102"
+
+with open("manifest.json", "r") as f:
+    manifest = json.load(f)
+    VERSION = manifest["version"]
 
 with open("README.md", "r") as f:
     LONG_DESCRIPTION = f.read()
 
 setuptools.setup(
-    name="dcm2niix-gear",
+    name="fw-gear-dcm2niix",
     version=VERSION,
     description="A Flywheel Gear for implementing Chris Rorden's dcm2niix for converting DICOM (or PAR/REC) to NIfTI (or NRRD), with an optional implementation of Poldrack Lab's PyDeface to remove facial structures from NIfTI.",
     long_description=LONG_DESCRIPTION,
