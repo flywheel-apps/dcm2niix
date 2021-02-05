@@ -19,11 +19,11 @@ def test_RunPydeface_WithInfile_Match():
     valid_file = f"{ASSETS_DIR}/pydeface_T1_infile.nii.gz"
 
     pydeface_run.deface_multiple_niftis([test_file])
-    
+
     valid_image = nb.load(valid_file).get_fdata()
     test_image = nb.load(test_file).get_fdata()
     outcome = np.array_equal(valid_image, test_image)
-       
+
     assert outcome is True
 
     os.remove(test_file)
@@ -91,4 +91,3 @@ def test_RunPydeface_WithAllOptions_Match():
     os.remove(test_file)
     os.remove(f"{ASSETS_DIR}/pydeface_T1_test_pydeface_mask.nii.gz")
     os.remove(f"{ASSETS_DIR}/pydeface_T1_test_pydeface.mat")
-
