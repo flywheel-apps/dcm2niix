@@ -118,6 +118,121 @@ def exit_if_archive_empty(archive_obj):
         os.sys.exit(1)
 
 
+def tally_files(dir_loc, print_out=False):
+    """
+    Function to profile directory. Note current exclusion of {'.DS_Store', '._*'}
+    from file_set and file_tree. # TODO move this exclusion?
+
+    Args:
+        dir_loc: directory to profile
+        [print_out]: print output
+    Returns:
+        file_set: set of file leaves
+        file_tree
+        file_name_path_dict
+    """
+
+    file_set = set()
+    file_name_path_dict = {}
+    file_tree = []
+    gen = os.walk(dir_loc, topdown=True)
+    next_gen = next(gen)
+    while next_gen != StopIteration:
+
+        # info on current folder and contents
+        (loc_i, dirs_i, files_i) = next_gen
+
+        # populate outputs
+        if len(files_i) > 0:
+
+            # set of files (short paths or leaves) found in directory
+            # TODO could probably just use keys() of dictionary formed below
+            file_set = file_set | set(
+                [file_ij for file_ij in files_i if (
+                    (file_ij != '.DS_Store') &
+                    (file_ij[0:2] != '._'))])
+
+            # directory structure in list form, no filter on files
+            file_tree.append([loc_i + "/" + file_ij for file_ij in files_i])
+
+            for file_ij in files_i:
+
+                # avoid collisions from collapsing filepaths
+                if file_ij in file_name_path_dict.keys() and ((file_ij != '.DS_Store') & (file_ij[0:2] != '._')):
+                    print(f"more than one file with name of {file_ij} in directory tree, exiting.")
+                    os.sys.exit(1)
+
+                # dictionary to look up full file paths
+                file_name_path_dict[file_ij] = os.path.join(loc_i, file_ij)
+
+        # display
+        if print_out:
+            print(f"file_set: {file_set}")
+            print(f"file_name_path_dict: {file_name_path_dict}")
+
+        # next folder:
+        try:
+            next_gen = next(gen)
+        except StopIteration:
+            next_gen = StopIteration
+
+    return \
+        file_set, \
+        file_tree, \
+        file_name_path_dict
+
+
+
+def flatten_directory(dir_source, dir_target, overwrite=False):
+    """
+    Args:
+        dir_source: possibly nested source
+        dir_target: place to create flat file structure
+
+    Returns:
+        info on source directory:
+            file_set_source
+            file_tree_source
+            file_name_path_dict_source
+
+        info on target directory
+            file_set_target
+            file_tree_target
+            file_name_path_dict_target
+    """
+    # TODO maybe write test for overwriting
+
+    # source directory tally
+    file_set_source, file_tree_source, file_name_path_dict_source = \
+        tally_files(dir_source)
+
+    # check for already existing/clear way for target directory
+    if os.path.exists(dir_target):
+        if overwrite :
+            shutil.rmtree(dir_target)
+        else:
+            print(f"file {dir_target} already exists, exiting.")
+            os.sys.exit(1)
+    os.mkdir(dir_target)
+
+    # the main part, move the files from the possibly hierarchical structure
+    # to the flat structure
+    for file in file_name_path_dict_source.keys():
+        shutil.move(file_name_path_dict_source[file], dir_target)
+
+    # target directory tally
+    file_set_target, file_tree_target, file_name_path_dict_target = \
+        tally_files(dir_target)
+
+    return \
+        file_set_source, \
+        file_tree_source, \
+        file_name_path_dict_source, \
+        file_set_target, \
+        file_tree_target, \
+        file_name_path_dict_target
+
+
 def extract_archive_contents(archive_obj, work_dir):
     """Extract archive contents to a directory created from the input filename."""
     # 1. Get the stage for zip or tar archive
@@ -138,28 +253,59 @@ def extract_archive_contents(archive_obj, work_dir):
         dcm2niix_input_dir, dirname = setup_dcm2niix_input_dir(filename, work_dir)
         archive_obj.extractall(dcm2niix_input_dir)
 
-    elif len(subdirs) == 1:
+    elif len(subdirs) >= 1:
 
         # Subdirectory name will be used as the dcm2niix input directory name
+        print(f"subdirs: {subdirs}")
         dcm2niix_input_dir, dirname = setup_dcm2niix_input_dir(subdirs[0], work_dir)
+        print(f"dcm2niix_input_dir: {dcm2niix_input_dir}")
 
+        # set temp directory to extract to, before flattening output contents
+        dcm2niix_input_dir_o = dcm2niix_input_dir + "_o"
+
+        # clean slate
+        if os.path.exists(dcm2niix_input_dir):
+            shutil.rmtree(dcm2niix_input_dir)
+        if os.path.exists(dcm2niix_input_dir_o):
+            shutil.rmtree(dcm2niix_input_dir_o)
+
+        # site for initial extraction
+        os.mkdir(dcm2niix_input_dir_o)
+
+        # extract
         if type(archive_obj) == zipfile.ZipFile:
-            archive_obj.extractall(
-                dcm2niix_input_dir, strip_prefix_ziparchive(archive_obj, subdirs[0])
-            )
+            for subdir in subdirs:
+                archive_obj.extractall(
+                    dcm2niix_input_dir_o, strip_prefix_ziparchive(archive_obj, subdir)
+                )
+        elif type(archive_obj) == tarfile.TarFile:
+            for subdir in subdirs:
+                archive_obj.extractall(
+                    dcm2niix_input_dir_o, strip_prefix_tararchive(archive_obj, subdir)
+                )
 
-        if type(archive_obj) == tarfile.TarFile:
-            archive_obj.extractall(
-                dcm2niix_input_dir, strip_prefix_tararchive(archive_obj, subdirs[0])
-            )
+        # flattening: take file leaves in dcm2niix_input_dir_o and move them dcm2niix_input_dir
+        file_set_source, \
+        file_tree_source, \
+        file_name_path_source, \
+        file_set_target, \
+        file_tree_target, \
+        file_name_path_dict_target = flatten_directory(dcm2niix_input_dir_o, dcm2niix_input_dir, overwrite=True)
+
+        # clean up
+        shutil.rmtree(dcm2niix_input_dir_o)
+
+        # display before/after
+        print(f"file_tree_source: {file_tree_source}")
+        print(f"file_tree_target: {file_tree_target}")
 
     else:
 
-        # Multiple subdirectories, input packaging not supported, exit
+        # if input packaging falls into none of above categories, not supported, exit
         log.error(
             (
                 "Incorrect gear input. Input archive packaging is not supported. "
-                f"Multiple subdirectories detected in archive: {subdirs}. Exiting."
+                f"Detected subdirs in archive: {subdirs}. Exiting."
             )
         )
         os.sys.exit(1)
