@@ -51,29 +51,6 @@ def test_CleanInfilepath_Underscores_Match():
     assert arrange.clean_filename("dicom__.zip") == "dicom"
 
 
-
-# @pytest.mark.parametrize('version', ["dicom_nested", "dicom_single", "parrec_single", "archive_copy_dicom"])
-# def test_PrepareDcm2niixInput_ZipArchive_MatchValidDataset(tmpdir, version):
-#
-#     infile = f"{ASSETS_DIR}/{version}.zip"
-#
-#     arrange.prepare_dcm2niix_input(infile, False, tmpdir)
-#     valid_dir = f"{ASSETS_DIR}/valid_dataset/{version}"
-#     out = filecmp.dircmp(tmpdir, valid_dir)
-#
-#     assert out.left_only == []
-#     assert out.right_only == []
-
-
-# def test_PrepareDcm2niixInput_ParRecSolo_MatchValidDataset():
-#
-#     tmp_dir = f"{ASSETS_DIR}/tmp"
-#     shutil.os.mkdir(tmp_dir)
-#     infile = f"{ASSETS_DIR}/parrec_solo.PAR"
-#     rec_infile = f"{ASSETS_DIR}/parrec_solo.REC"
-#
-#     arrange.prepare_dcm2niix_input(infile, rec_infile, tmp_dir)
-
 @pytest.mark.parametrize("version, ext", [
     ("dicom_nested_one_level", "zip"),
     ("dicom_nested_two_levels", "zip"),
