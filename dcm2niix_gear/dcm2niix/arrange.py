@@ -119,8 +119,7 @@ def exit_if_archive_empty(archive_obj):
 
 
 def tally_files(dir_loc, print_out=False):
-    """
-    Function to profile directory. Note current exclusion of {'.DS_Store', '._*'}
+    """Function to profile directory. Note current exclusion of {'.DS_Store', '._*'}
     from file_set and file_tree. # TODO move this exclusion?
 
     Args:
@@ -137,37 +136,36 @@ def tally_files(dir_loc, print_out=False):
     file_tree = []
     gen = os.walk(dir_loc, topdown=True)
     next_gen = next(gen)
+    # want to exclude files matching certain patterns str_to_exclude
+    strs_to_exclude = [".DS_Store", "^._"]
+    excludes = [re.compile(s) for s in strs_to_exclude]
     while next_gen != StopIteration:
 
         # info on current folder and contents
         (loc_i, dirs_i, files_i) = next_gen
 
-        # populate outputs
-        if len(files_i) > 0:
+        for file_ij in files_i:
 
-            # set of files (short paths or leaves) found in directory
-            # TODO could probably just use keys() of dictionary formed below
-            file_set = file_set | set(
-                [file_ij for file_ij in files_i if (
-                    (file_ij != '.DS_Store') &
-                    (file_ij[0:2] != '._'))])
-
-            # directory structure in list form, no filter on files
-            file_tree.append([loc_i + "/" + file_ij for file_ij in files_i])
-
-            for file_ij in files_i:
+            if all([not (exclude.search(file_ij)) for exclude in excludes]):
 
                 # avoid collisions from collapsing filepaths
-                if file_ij in file_name_path_dict.keys() and ((file_ij != '.DS_Store') & (file_ij[0:2] != '._')):
+                if file_ij in file_name_path_dict.keys():
                     print(f"more than one file with name of {file_ij} in directory tree, exiting.")
                     os.sys.exit(1)
+
+                # set of files (short paths or leaves) found in directory
+                file_set = file_set | set([file_ij])
 
                 # dictionary to look up full file paths
                 file_name_path_dict[file_ij] = os.path.join(loc_i, file_ij)
 
+            # directory structure in list form, no filter on files
+            file_tree.append(loc_i + "/" + file_ij)
+
         # display
         if print_out:
             print(f"file_set: {file_set}")
+            print(f"file_tree: {file_tree}")
             print(f"file_name_path_dict: {file_name_path_dict}")
 
         # next folder:
@@ -180,7 +178,6 @@ def tally_files(dir_loc, print_out=False):
         file_set, \
         file_tree, \
         file_name_path_dict
-
 
 
 def flatten_directory(dir_source, dir_target, overwrite=False):
@@ -208,7 +205,7 @@ def flatten_directory(dir_source, dir_target, overwrite=False):
 
     # check for already existing/clear way for target directory
     if os.path.exists(dir_target):
-        if overwrite :
+        if overwrite:
             shutil.rmtree(dir_target)
         else:
             print(f"file {dir_target} already exists, exiting.")
@@ -290,14 +287,19 @@ def extract_archive_contents(archive_obj, work_dir):
         file_name_path_source, \
         file_set_target, \
         file_tree_target, \
-        file_name_path_dict_target = flatten_directory(dcm2niix_input_dir_o, dcm2niix_input_dir, overwrite=True)
+        file_name_path_dict_target = flatten_directory(dcm2niix_input_dir_o, dcm2niix_input_dir)
 
         # clean up
         shutil.rmtree(dcm2niix_input_dir_o)
 
         # display before/after
-        print(f"file_tree_source: {file_tree_source}")
-        print(f"file_tree_target: {file_tree_target}")
+        file_tree_source_str = '\n'.join(file_tree_source)
+        file_tree_target_str = '\n'.join(file_tree_target)
+
+        log.info(
+            f"\n\nfile_tree_source:\n{file_tree_source_str}\n"
+            f"\nfile_tree_target:\n{file_tree_target_str}\n\n"
+        )
 
     else:
 
