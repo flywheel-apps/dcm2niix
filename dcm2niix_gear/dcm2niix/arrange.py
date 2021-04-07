@@ -119,16 +119,17 @@ def exit_if_archive_empty(archive_obj):
 
 
 def tally_files(dir_loc, print_out=False):
-    """Function to profile directory. Note current exclusion of {'.DS_Store', '._*'}
+    """Function to profile directory. Note current exclusion of {'\.DS_Store.*', '^\._.*'}
     from file_set and file_tree. # TODO move this exclusion?
 
     Args:
-        dir_loc: directory to profile
-        [print_out]: print output
+        dir_loc (str): path to directory to profile
+        print_out (bool): log output (Default: False)
     Returns:
-        file_set: set of file leaves
-        file_tree
-        file_name_path_dict
+        file_set (set): set of file leaves that pass the regex criteria
+        file_tree (list): list showing full filepaths of all files
+        file_name_path_dict (dict): dict mapping from filenames that pass
+         the regex criteria to full filepath
     """
 
     file_set = set()
@@ -137,16 +138,17 @@ def tally_files(dir_loc, print_out=False):
     gen = os.walk(dir_loc, topdown=True)
     next_gen = next(gen)
     # want to exclude files matching certain patterns str_to_exclude
-    strs_to_exclude = [".DS_Store", "^._"]
+    strs_to_exclude = ["\.DS_Store.*", "^\._.*"]
     excludes = [re.compile(s) for s in strs_to_exclude]
-    while next_gen != StopIteration:
+    while True:
 
         # info on current folder and contents
         (loc_i, dirs_i, files_i) = next_gen
 
         for file_ij in files_i:
 
-            if all([not (exclude.search(file_ij)) for exclude in excludes]):
+            # if filename doesn't match any of the exclude patterns:
+            if not any([exclude.search(file_ij) for exclude in excludes]):
 
                 # avoid collisions from collapsing filepaths
                 if file_ij in file_name_path_dict.keys():
@@ -160,19 +162,20 @@ def tally_files(dir_loc, print_out=False):
                 file_name_path_dict[file_ij] = os.path.join(loc_i, file_ij)
 
             # directory structure in list form, no filter on files
-            file_tree.append(loc_i + "/" + file_ij)
+            file_tree.append(os.path.join(loc_i, file_ij))
 
-        # display
-        if print_out:
-            print(f"file_set: {file_set}")
-            print(f"file_tree: {file_tree}")
-            print(f"file_name_path_dict: {file_name_path_dict}")
+        # info for debugging log
+        log.debug(
+            f"file_set: {file_set}"
+            f"file_tree: {file_tree}"
+            f"file_name_path_dict: {file_name_path_dict}"
+        )
 
         # next folder:
         try:
             next_gen = next(gen)
         except StopIteration:
-            next_gen = StopIteration
+            break
 
     return \
         file_set, \
@@ -181,21 +184,26 @@ def tally_files(dir_loc, print_out=False):
 
 
 def flatten_directory(dir_source, dir_target, overwrite=False):
-    """
+    """Takes input directory and creates corresponding output directory
+     with relevant files all at one level.
+
     Args:
-        dir_source: possibly nested source
-        dir_target: place to create flat file structure
+        dir_source (str): possibly nested source
+        dir_target (str): place to create flat file structure
+        overwrite (bool): if True overwrite files if they already exist
 
     Returns:
         info on source directory:
-            file_set_source
-            file_tree_source
-            file_name_path_dict_source
+            file_set_source (set): set of file leaves that pass the regex criteria
+            file_tree_source (list): list showing full filepaths of all files
+            file_name_path_dict_source (dict): dict mapping from filenames that pass
+             the regex criteria to full filepath
 
         info on target directory
-            file_set_target
-            file_tree_target
-            file_name_path_dict_target
+            file_set_target (set): set of file leaves that pass the regex criteria
+            file_tree_target (list): list showing full filepaths of all files
+            file_name_path_dict_target (dict): dict mapping from filenames that pass
+             the regex criteria to full filepath
     """
     # TODO maybe write test for overwriting
 
@@ -205,7 +213,7 @@ def flatten_directory(dir_source, dir_target, overwrite=False):
 
     # check for already existing/clear way for target directory
     if os.path.exists(dir_target):
-        if overwrite:
+        if overwrite is True:
             shutil.rmtree(dir_target)
         else:
             print(f"file {dir_target} already exists, exiting.")
@@ -221,13 +229,13 @@ def flatten_directory(dir_source, dir_target, overwrite=False):
     file_set_target, file_tree_target, file_name_path_dict_target = \
         tally_files(dir_target)
 
-    return \
-        file_set_source, \
-        file_tree_source, \
-        file_name_path_dict_source, \
-        file_set_target, \
-        file_tree_target, \
-        file_name_path_dict_target
+    # log before/after
+    file_tree_source_str = '\n'.join(file_tree_source)
+    file_tree_target_str = '\n'.join(file_tree_target)
+    log.info(
+        f"\n\nfile_tree_source:\n{file_tree_source_str}\n"
+        f"\nfile_tree_target:\n{file_tree_target_str}\n\n"
+    )
 
 
 def extract_archive_contents(archive_obj, work_dir):
@@ -282,24 +290,10 @@ def extract_archive_contents(archive_obj, work_dir):
                 )
 
         # flattening: take file leaves in dcm2niix_input_dir_o and move them dcm2niix_input_dir
-        file_set_source, \
-        file_tree_source, \
-        file_name_path_source, \
-        file_set_target, \
-        file_tree_target, \
-        file_name_path_dict_target = flatten_directory(dcm2niix_input_dir_o, dcm2niix_input_dir)
+        flatten_directory(dcm2niix_input_dir_o, dcm2niix_input_dir)
 
         # clean up
         shutil.rmtree(dcm2niix_input_dir_o)
-
-        # display before/after
-        file_tree_source_str = '\n'.join(file_tree_source)
-        file_tree_target_str = '\n'.join(file_tree_target)
-
-        log.info(
-            f"\n\nfile_tree_source:\n{file_tree_source_str}\n"
-            f"\nfile_tree_target:\n{file_tree_target_str}\n\n"
-        )
 
     else:
 
