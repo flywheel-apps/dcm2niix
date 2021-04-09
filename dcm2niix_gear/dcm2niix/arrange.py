@@ -118,13 +118,12 @@ def exit_if_archive_empty(archive_obj):
         os.sys.exit(1)
 
 
-def tally_files(dir_loc, print_out=False):
+def tally_files(dir_loc):
     """Function to profile directory. Note current exclusion of {'\.DS_Store.*', '^\._.*'}
     from file_set and file_tree. # TODO move this exclusion?
 
     Args:
         dir_loc (str): path to directory to profile
-        print_out (bool): log output (Default: False)
     Returns:
         file_set (set): set of file leaves that pass the regex criteria
         file_tree (list): list showing full filepaths of all files
@@ -138,7 +137,7 @@ def tally_files(dir_loc, print_out=False):
     gen = os.walk(dir_loc, topdown=True)
     next_gen = next(gen)
     # want to exclude files matching certain patterns str_to_exclude
-    strs_to_exclude = ["\.DS_Store.*", "^\._.*"]
+    strs_to_exclude = ["^\..*"]
     excludes = [re.compile(s) for s in strs_to_exclude]
     while True:
 
@@ -152,7 +151,7 @@ def tally_files(dir_loc, print_out=False):
 
                 # avoid collisions from collapsing filepaths
                 if file_ij in file_name_path_dict.keys():
-                    print(f"more than one file with name of {file_ij} in directory tree, exiting.")
+                    log.error(f"more than one file with name of {file_ij} in directory tree, exiting.")
                     os.sys.exit(1)
 
                 # set of files (short paths or leaves) found in directory
@@ -216,7 +215,7 @@ def flatten_directory(dir_source, dir_target, overwrite=False):
         if overwrite is True:
             shutil.rmtree(dir_target)
         else:
-            print(f"file {dir_target} already exists, exiting.")
+            log.error(f"file {dir_target} already exists, exiting.")
             os.sys.exit(1)
     os.mkdir(dir_target)
 
@@ -261,9 +260,9 @@ def extract_archive_contents(archive_obj, work_dir):
     elif len(subdirs) >= 1:
 
         # Subdirectory name will be used as the dcm2niix input directory name
-        print(f"subdirs: {subdirs}")
+        log.info(f"subdirs: {subdirs}")
         dcm2niix_input_dir, dirname = setup_dcm2niix_input_dir(subdirs[0], work_dir)
-        print(f"dcm2niix_input_dir: {dcm2niix_input_dir}")
+        log.info(f"dcm2niix_input_dir: {dcm2niix_input_dir}")
 
         # set temp directory to extract to, before flattening output contents
         dcm2niix_input_dir_o = dcm2niix_input_dir + "_o"

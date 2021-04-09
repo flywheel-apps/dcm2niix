@@ -83,10 +83,7 @@ def test_PrepareDcm2niixInput_Zip_Tar_Archive_MatchValidDataset(version, ext, tm
     # define old dir
     old_dir = f"{ASSETS_DIR}/valid_dataset/{version}" # corresponding unzipped dir
 
-    # define and populate new dir
-    if os.path.exists(tmpdir):
-        shutil.rmtree(tmpdir)
-    os.mkdir(tmpdir)
+    # populate new dir
     new_dir = arrange.prepare_dcm2niix_input(infile, False, tmpdir)
 
     # get info on two directories: old and new
@@ -133,17 +130,9 @@ def test_PrepareDcm2niixInput_Archive_CatchCollisionError(version, ext, tmpdir):
     # source
     infile = f"{ASSETS_DIR}/{version}.{ext}"
 
-    # target
-    if os.path.exists(tmpdir):
-        shutil.rmtree(tmpdir)
-    shutil.os.mkdir(tmpdir)
-
     # store any exception, to check after cleanup
     with pytest.raises(SystemExit) as exception:
         arrange.prepare_dcm2niix_input(infile, False, tmpdir)
-
-    # clean up
-    shutil.rmtree(tmpdir)
 
     # was exception raised?
     assert exception.type == SystemExit
@@ -160,9 +149,6 @@ def test_PrepareDcm2niixInput_ParRecSolo_MatchValidDataset(tmpdir):
         N/A, makes assertions though
     """
 
-    if os.path.exists(tmpdir):
-        shutil.rmtree(tmpdir)
-    shutil.os.mkdir(tmpdir)
     infile = f"{ASSETS_DIR}/parrec_solo.PAR"
     rec_infile = f"{ASSETS_DIR}/parrec_solo.REC"
 
@@ -172,5 +158,3 @@ def test_PrepareDcm2niixInput_ParRecSolo_MatchValidDataset(tmpdir):
 
     assert out.left_only == []
     assert out.right_only == []
-
-    shutil.rmtree(tmpdir)
