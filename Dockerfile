@@ -15,21 +15,52 @@ RUN echo ". /etc/fsl/5.0/fsl.sh" >> /root/.bashrc
 # Python setup - version 3.6 in base image
 RUN apt-get update \
     && apt-get install -y python3-pip
-COPY requirements.txt ./requirements.txt
-RUN pip3 install -r requirements.txt
 
 # Install packages for building and executing dcm2niix
-RUN apt-get update -qq \
-    && apt-get install -y \
-    git \
-    curl \
-    build-essential \
-    cmake \
-    pkg-config \
-    libgdcm-tools \
-    bsdtar \
-    unzip \
-    pigz
+RUN apt-get update -qq &&\
+    apt-get install -y \
+        git \
+        curl \
+        build-essential \
+        cmake \
+        pkg-config \
+        libgdcm-tools \
+        bsdtar \
+        unzip \
+        pigz
+
+# Install additional libraries for added calls below
+RUN apt-get update -qq && \
+    apt-get install -y \
+        make \
+        build-essential \
+        libssl-dev \
+        zlib1g-dev \
+        libbz2-dev \
+        libreadline-dev \
+        libsqlite3-dev wget \
+        llvm \
+        libncurses5-dev \
+        libncursesw5-dev \
+        xz-utils \
+        tk-dev \
+        libffi-dev \
+        liblzma-dev \
+        python-openssl
+
+# Install pyenv and then more recent version of Python for toolkit dependencies
+RUN curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
+ENV PYENV_ROOT /root/.pyenv
+ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
+RUN eval "$(pyenv init -)"
+RUN eval "$(pyenv virtualenv-init -)"
+RUN pyenv install 3.8.0
+RUN pyenv local 3.8.0
+
+# Bring in toml file, install and run poetry package management
+COPY pyproject.toml ./pyproject.toml
+RUN pip3 install poetry
+RUN poetry install --no-dev
 
 # Compile dcm2niix from source (version 2-November-2020 (v1.0.20201102))
 ENV DCMCOMMIT=081c6300d0cf47088f0873cd586c9745498f637a

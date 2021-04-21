@@ -1,12 +1,13 @@
 """Testing for functions within arrange.py script."""
 
 import filecmp
-import pytest
 import os
 import shutil
 import tarfile
 import zipfile
 from pathlib import Path
+
+import pytest
 
 from dcm2niix_gear.dcm2niix import arrange
 
@@ -15,7 +16,7 @@ ASSETS_DIR = Path(__file__).parent / "assets"
 
 def test_IsArchiveEmpty_EmptyZipArchive_CatchEmptyArchiveError():
     """Assertion to test whether exit_if_archive_empty() catches
-        case of empty input zip file."""
+    case of empty input zip file."""
     with pytest.raises(SystemExit) as exception:
         archiveObj = zipfile.ZipFile(f"{ASSETS_DIR}/empty_archive.zip", "r")
         arrange.exit_if_archive_empty(archiveObj)
@@ -35,7 +36,7 @@ def test_IsArchiveEmpty_EmptyTarArchive_CatchEmptyArchiveError():
 
 def test_CleanInfilepath_Extensions_Match():
     """Assertions on test cases to check file path extension cleaning
-     transformation."""
+    transformation."""
     assert arrange.clean_filename("dicom.dicom.zip") == "dicom"
     assert arrange.clean_filename("dicom.dcm.tgz") == "dicom"
     assert arrange.clean_filename("parrec.parrec.zip") == "parrec"
@@ -56,13 +57,16 @@ def test_CleanInfilepath_Underscores_Match():
     assert arrange.clean_filename("dicom__.zip") == "dicom"
 
 
-@pytest.mark.parametrize("version, ext", [
-    ("dicom_nested_one_level", "zip"),
-    ("dicom_nested_two_levels", "zip"),
-    ("dicom_nested_uneven", "zip"),
-    ("dicom_single", "tgz"),
-    ("parrec_single", "tgz")
-])
+@pytest.mark.parametrize(
+    "version, ext",
+    [
+        ("dicom_nested_one_level", "zip"),
+        ("dicom_nested_two_levels", "zip"),
+        ("dicom_nested_uneven", "zip"),
+        ("dicom_single", "tgz"),
+        ("parrec_single", "tgz"),
+    ],
+)
 def test_PrepareDcm2niixInput_Zip_Tar_Archive_MatchValidDataset(version, ext, tmpdir):
     """Compares output of prepare_dcm2niix_input on zip/tar input
     with known answer, valid output.
@@ -78,10 +82,10 @@ def test_PrepareDcm2niixInput_Zip_Tar_Archive_MatchValidDataset(version, ext, tm
     """
 
     # define input file, define and populate new_dir
-    infile = f"{ASSETS_DIR}/{version}.{ext}" #
+    infile = f"{ASSETS_DIR}/{version}.{ext}"  #
 
     # define old dir
-    old_dir = f"{ASSETS_DIR}/valid_dataset/{version}" # corresponding unzipped dir
+    old_dir = f"{ASSETS_DIR}/valid_dataset/{version}"  # corresponding unzipped dir
 
     # populate new dir
     new_dir = arrange.prepare_dcm2niix_input(infile, False, tmpdir)
@@ -95,7 +99,11 @@ def test_PrepareDcm2niixInput_Zip_Tar_Archive_MatchValidDataset(version, ext, tm
     assert len(file_set_old - file_set_new) == 0
 
     # file-level
-    for file in [file_ for file_ in file_name_path_dict_new.keys() if ((file_ != '.DS_Store') & (file_[0:2] != '._'))]:
+    for file in [
+        file_
+        for file_ in file_name_path_dict_new.keys()
+        if ((file_ != ".DS_Store") & (file_[0:2] != "._"))
+    ]:
 
         # compare old and new file paths, check new one has expected form
         old_file_path = file_name_path_dict_old[file]
@@ -108,11 +116,14 @@ def test_PrepareDcm2niixInput_Zip_Tar_Archive_MatchValidDataset(version, ext, tm
         assert out
 
 
-@pytest.mark.parametrize("version, ext", [
-    ("dicom_nested_one_level_collision", "zip"),
-    ("dicom_nested_two_levels_collision", "zip"),
-    ("dicom_nested_uneven_collision", "zip")
-])
+@pytest.mark.parametrize(
+    "version, ext",
+    [
+        ("dicom_nested_one_level_collision", "zip"),
+        ("dicom_nested_two_levels_collision", "zip"),
+        ("dicom_nested_uneven_collision", "zip"),
+    ],
+)
 def test_PrepareDcm2niixInput_Archive_CatchCollisionError(version, ext, tmpdir):
     """Tests ability to catch collisions, where there are files with the same name
     (presumably at different levels) in the input that will be mapped to the same
