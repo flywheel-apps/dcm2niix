@@ -219,43 +219,50 @@ def capture(
             capture_metadata.append(filedata)
 
         # Data files
+        # Split sidecar into the "root" name by removing .json suffix
+        stem = sidecar.split('.json')[0]
         for file in output_image_files:
+            # Split image name by "root" name from sidecar
+            substr = file.split(stem)
+            # If the "root" name of sidecar is not a substring of image file
+            #   We don't care about this image file.
+            if len(substr) < 2:
+                continue
+            # Get "root" and what's "left" over after splitting of "root" name
+            #   from sidecar
+            substr = _, left
 
-            if Path(sidecar).stem in Path(file).stem:
+            if retain_nifti:
 
-                file_type = "".join(Path(file).suffixes)
+                # NIfTI
+                if left in [".nii.gz", ".nii"]:
+                    filedata = create_file_metadata(
+                        file, "nifti", classification, metadata, modality
+                    )
+                    capture_metadata.append(filedata)
 
-                if retain_nifti:
+                # bval
+                if left in [".bval"]:
+                    filedata = create_file_metadata(
+                        file, "bval", classification, metadata, modality
+                    )
+                    capture_metadata.append(filedata)
 
-                    # NIfTI
-                    if file_type in [".nii.gz", ".nii"]:
-                        filedata = create_file_metadata(
-                            file, "nifti", classification, metadata, modality
-                        )
-                        capture_metadata.append(filedata)
+                # bvec
+                if left in [".bvec"]:
+                    filedata = create_file_metadata(
+                        file, "bvec", classification, metadata, modality
+                    )
+                    capture_metadata.append(filedata)
 
-                    # bval
-                    if file_type in [".bval"]:
-                        filedata = create_file_metadata(
-                            file, "bval", classification, metadata, modality
-                        )
-                        capture_metadata.append(filedata)
+            if output_nrrd:
 
-                    # bvec
-                    if file_type in [".bvec"]:
-                        filedata = create_file_metadata(
-                            file, "bvec", classification, metadata, modality
-                        )
-                        capture_metadata.append(filedata)
-
-                if output_nrrd:
-
-                    # NRRD
-                    if file_type in [".raw.gz", ".nhdr", ".nrrd"]:
-                        filedata = create_file_metadata(
-                            file, "nrrd", classification, metadata, modality
-                        )
-                        capture_metadata.append(filedata)
+                # NRRD
+                if left in [".raw.gz", ".nhdr", ".nrrd"]:
+                    filedata = create_file_metadata(
+                        file, "nrrd", classification, metadata, modality
+                    )
+                    capture_metadata.append(filedata)
 
         # PyDeface files
         if pydeface_intermediaries:

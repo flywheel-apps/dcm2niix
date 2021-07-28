@@ -161,9 +161,9 @@ def retain_gear_outputs(
             log.info(f"Moving {sidecar} to output directory.")
 
         # Move data files, if indicated
+        # Split sidecar into the "root" name by removing .json suffix
+        stem = sidecar.split('.json')[0]
         for file in output_image_files:
-            # Split sidecar into the "root" name by removing .json suffix
-            stem = sidecar.split('.json')[0]
             # Split image name by "root" name from sidecar
             substr = file.split(stem)
             # If the "root" name of sidecar is not a substring of image file
@@ -172,7 +172,7 @@ def retain_gear_outputs(
                 continue
             # Get "root" and what's "left" over after splitting of "root" name
             #   from sidecar
-            substr = root, left
+            substr = _, left
 
             if retain_nifti:
                 # If "left" over is simply the extension, this image matches
