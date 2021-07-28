@@ -172,7 +172,7 @@ def retain_gear_outputs(
                 continue
             # Get "root" and what's "left" over after splitting of "root" name
             #   from sidecar
-            substr = _, left
+            _, left = substr
 
             if retain_nifti:
                 # If "left" over is simply the extension, this image matches
