@@ -161,21 +161,32 @@ def retain_gear_outputs(
             log.info(f"Moving {sidecar} to output directory.")
 
         # Move data files, if indicated
+        # Split sidecar into the "root" name by removing .json suffix
+        stem = sidecar.split('.json')[0]
         for file in output_image_files:
+            # Split image name by "root" name from sidecar
+            substr = file.split(stem)
+            # If the "root" name of sidecar is not a substring of image file
+            #   We don't care about this image file.
+            if len(substr) < 2:
+                continue
+            # Get "root" and what's "left" over after splitting of "root" name
+            #   from sidecar
+            _, left = substr
 
-            if Path(sidecar).stem in Path(file).stem:
+            if retain_nifti:
+                # If "left" over is simply the extension, this image matches
+                #   the current sidecar, move to output.
+                if left in [".nii.gz", ".nii", ".bval", ".bvec"]:
+                    log.info(f"Moving {file} to output directory.")
+                    shutil.move(file, output_dir)
 
-                file_type = "".join(Path(file).suffixes)
-
-                if retain_nifti:
-                    if file_type in [".nii.gz", ".nii", ".bval", ".bvec"]:
-                        log.info(f"Moving {file} to output directory.")
-                        shutil.move(file, output_dir)
-
-                if output_nrrd:
-                    if file_type in [".raw.gz", ".nhdr", ".nrrd"]:
-                        log.info(f"Moving {file} to output directory.")
-                        shutil.move(file, output_dir)
+            if output_nrrd:
+                # If "left" over is simply the extension, this image matches
+                #   the current sidecar, move to output.
+                if left in [".raw.gz", ".nhdr", ".nrrd"]:
+                    log.info(f"Moving {file} to output directory.")
+                    shutil.move(file, output_dir)
 
         # PyDeface files
         if pydeface_intermediaries:
