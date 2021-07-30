@@ -28,10 +28,11 @@ The [Poldrack Lab's PyDeface](https://github.com/poldracklab/pydeface) is a popu
 #### dcm2niix
 * **anonymize_bids**: Anonymize BIDS. Options: true (default), false. **bids_sidecar** config option must be enabled (i.e., 'y' or 'o' options).
 * **bids_sidecar**: Output BIDS sidecar in JSON format. Options are 'y'=yes, 'n'=no (default), 'o'=only (whereby no NIfTI file will be generated).
-        - Note: bids_sidecar is always invoked when running dcm2niix to be used as metadata. User configuration preference is handled after acquiring metadata.
+        - Note: bids_sidecar is always invoked when running dcm2niix to be used as metadata. User configuration preference is handled after acquiring metadata. If JSON file not present, NIfTI(s), even if produced may not be copied into final output.
 
 * **comment**: If non-empty, store comment as NIfTI aux_file. Options: non-empty string, 24 characters maximum.
         - Note: The 24 character comment is placed in (1) all NIfTI output files in the aux_file variable. You can use fslhdr to access the NIfTI header data and see this comment; and (2) all JSON files (i.e., BIDS sidecars), which means the comment is stored as metadata for all associated output files and would be included in the **bids_sidecar** file, if invoked.
+
 
 * **compress_images**: Gzip compress images. Options: 'y'=yes (default), 'i'=internal, 'n'=no, '3'=no,3D.
         - Note: If option '3' is chosen, the filename flag will be set to '-f %p_%s' to prevent overwriting files.
