@@ -162,6 +162,7 @@ def retain_gear_outputs(
 
         # Move data files, if indicated
         # Split sidecar into the "root" name by removing .json suffix
+        # Watch out for naming conflicts with shared stems (like stem_real.nii.gz or stem_imaginary.nii.gz)
         stem = sidecar.split('.json')[0]
         for file in output_image_files:
             # Split image name by "root" name from sidecar
@@ -176,8 +177,10 @@ def retain_gear_outputs(
 
             if retain_nifti:
                 # If "left" over is simply the extension, this image matches
-                #   the current sidecar, move to output.
-                if left in [".nii.gz", ".nii", ".bval", ".bvec"]:
+                #   the current sidecar, move to output. If an underscore is in "left", then
+                # there is likely a longer string filename that will match a specific sidecar
+                # in a future loop.
+                if (left in [".nii.gz", ".nii", ".bval", ".bvec"]) and (not "_" in left):
                     log.info(f"Moving {file} to output directory.")
                     shutil.move(file, output_dir)
 
