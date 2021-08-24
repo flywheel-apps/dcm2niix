@@ -179,7 +179,7 @@ def retain_gear_outputs(
                 # If "left" over is simply the extension, this image matches
                 #   the current sidecar, move to output. If an underscore is in "left", then
                 # there is likely a longer string filename that will match a specific sidecar
-                # in a future loop.
+                # in a future loop. `and left.startswith('.') may be equally as useful
                 if (left in [".nii.gz", ".nii", ".bval", ".bvec"]) and (not "_" in left):
                     log.info(f"Moving {file} to output directory.")
                     shutil.move(file, output_dir)
