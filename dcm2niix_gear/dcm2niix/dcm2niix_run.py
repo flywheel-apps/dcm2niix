@@ -4,8 +4,8 @@ import logging
 import os
 from distutils import util
 
-from nipype.interfaces.dcm2nii import Dcm2niix
-
+# from nipype.interfaces.dcm2nii import Dcm2niix
+from .interfaces import Dcm2niixEnhanced
 
 logging.getLogger("nipype.interface").setLevel("CRITICAL")
 log = logging.getLogger(__name__)
@@ -76,7 +76,8 @@ def convert_directory(
     """
     try:
 
-        converter = Dcm2niix()
+        # converter = Dcm2niix()
+        converter = Dcm2niixEnhanced()
         log.info(f"Starting dcm2niix {converter.version}")
         log.info(f"Submitting {len(os.listdir(source_dir))} DICOMs.")
 
