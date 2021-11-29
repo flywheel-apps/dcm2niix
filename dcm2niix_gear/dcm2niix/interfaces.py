@@ -12,7 +12,6 @@ class Dcm2niixEnhanced(Dcm2niix):
         filenames = []
         for line in stdout.split("\n"):
             if line.startswith("Convert "):  # output
-                print(re.search(r"\S+/\S+", line))
                 fname = str(re.search(r"\S+/\S+", line).group(0))
                 fname = glob.escape(fname)
                 filenames.append(os.path.abspath(fname))
