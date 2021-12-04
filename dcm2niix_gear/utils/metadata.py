@@ -175,9 +175,12 @@ def capture(
                 try:
                     dicom_header = pydicom.read_file(dicom)
 
-                    dicom_series_description = dicom_header.SeriesDescription.replace(
-                        " ", "_"
-                    )
+                    if dicom_header.get("SeriesDescription"):
+                        dicom_series_description = dicom_header.SeriesDescription \
+                            .replace(" ", "_")
+                    else:
+                        dicom_series_description = ""
+
                     dicom_series_number = str(dicom_header.SeriesNumber)
 
                     if (dicom_series_description == series_description) and (
