@@ -80,7 +80,7 @@
       "bids_sidecar": {
           "description": "Output BIDS sidecar in JSON format. Options are 'y'=yes, 'n'=no (default), 'o'=only (whereby no NIfTI file will be generated). Note: bids_sidecar is always invoked when running dcm2niix to be used as metadata. User configuration preference is handled after acquiring metadata.",
           "type": "string",
-          "default": "n",
+          "default": "y",
           "enum": [
               "y",
               "n",
@@ -162,8 +162,13 @@
       },
       "merge2d": {
           "description": "Merge 2D slices from the same series regardless of study time, echo, coil, orientation, etc. Options: true, false (default).",
-          "type": "boolean",
-          "default": false
+          "type": "string",
+          "default": "2",
+          "enum": [
+              "y",
+              "n",
+              "2"
+          ]
       },
       "output_nrrd": {
           "description": "Export as NRRD instead of NIfTI. Options: true, false (default). Tip: To export .nrrd, change the **compress_images** config option to 'n'; otherwise, the output will split into two files (.raw.gz and .nhdr).",
