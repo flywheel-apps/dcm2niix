@@ -25,7 +25,7 @@ def convert_directory(
     ignore_derived=False,
     ignore_errors=False,
     lossless_scaling=False,
-    merge2d=False,
+    merge2d="2",
     output_nrrd=False,
     philips_scaling=True,
     single_file_mode=False,
@@ -149,7 +149,12 @@ def convert_directory(
             converter.inputs.args = f"-l {lossless_scaling}"
 
         # dcm2niix command configurations for: merge2d
-        converter.inputs.merge_imgs = merge2d
+        if merge2d in ["y", "n", "2"]:
+            if converter.inputs.args:
+                converter.inputs.args = converter.inputs.args + f" -m {merge2d}"
+            else:
+                converter.inputs.args = f"-m {merge2d}"
+
 
         # dcm2niix command configurations for: output_nrrd
         converter.inputs.to_nrrd = output_nrrd

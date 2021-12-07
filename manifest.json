@@ -2,7 +2,7 @@
   "name": "dcm2niix",
   "label": "dcm2niix: DICOM to NIfTI conversion (with PyDeface)",
   "description": "Implementation of Chris Rorden's dcm2niix tool for converting DICOM (or PAR/REC) to NIfTI (or NRRD), with an optional implementation of Poldrack Lab's PyDeface to remove facial structures from NIfTI.",
-  "version": "1.3.1_1.0.20201102",
+  "version": "1.3.2_1.0.20201102",
   "author": "Flywheel",
   "maintainer": "Flywheel <support@flywheel.io>",
   "url": "https://github.com/rordenlab/dcm2niix",
@@ -12,7 +12,7 @@
   "custom": {
        "gear-builder": {
            "category": "converter",
-           "image": "flywheel/dcm2niix:1.3.1_1.0.20201102"
+           "image": "flywheel/dcm2niix:1.3.2_1.0.20201102"
       },
       "flywheel": {
           "suite": "Conversion"
@@ -80,7 +80,7 @@
       "bids_sidecar": {
           "description": "Output BIDS sidecar in JSON format. Options are 'y'=yes, 'n'=no (default), 'o'=only (whereby no NIfTI file will be generated). Note: bids_sidecar is always invoked when running dcm2niix to be used as metadata. User configuration preference is handled after acquiring metadata.",
           "type": "string",
-          "default": "n",
+          "default": "y",
           "enum": [
               "y",
               "n",
@@ -162,8 +162,13 @@
       },
       "merge2d": {
           "description": "Merge 2D slices from the same series regardless of study time, echo, coil, orientation, etc. Options: true, false (default).",
-          "type": "boolean",
-          "default": false
+          "type": "string",
+          "default": "2",
+          "enum": [
+              "y",
+              "n",
+              "2"
+          ]
       },
       "output_nrrd": {
           "description": "Export as NRRD instead of NIfTI. Options: true, false (default). Tip: To export .nrrd, change the **compress_images** config option to 'n'; otherwise, the output will split into two files (.raw.gz and .nhdr).",
