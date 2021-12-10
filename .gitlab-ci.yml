@@ -1,8 +1,8 @@
 include:
   - project: flywheel-io/flywheel-apps/utils/ci-templates
-    ref: master
-    file: poetry-pre-commit.yml
+    ref: main
+    file: poetry-pre-commit-no-base.yml
 
 variables:
-  PYPI: "false"         # default is "false" in poetry-pre-commit.yml
+  PYPI: "false"
   DOCKER_HUB: "false"    # default is "true" in poetry-pre-commit.yml
