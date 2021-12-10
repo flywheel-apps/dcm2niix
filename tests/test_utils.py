@@ -1,9 +1,16 @@
 """Testing for functions within dcm2niix_utils.py script."""
 
-import pytest
+import os
+import shutil
+import tempfile
 from pathlib import Path
+from unittest import mock
 
-from dcm2niix_gear.dcm2niix import dcm2niix_utils
+import nibabel as nb
+import numpy as np
+import pytest
+
+from fw_gear_dcm2niix.dcm2niix import dcm2niix_utils
 
 ASSETS_DIR = Path(__file__).parent / "assets"
 

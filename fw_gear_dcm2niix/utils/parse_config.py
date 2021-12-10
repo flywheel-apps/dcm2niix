@@ -1,8 +1,8 @@
 """Function to parse gear config into gear args."""
 
 import logging
-import pprint
 import os
+import pprint
 from pathlib import Path
 
 log = logging.getLogger(__name__)

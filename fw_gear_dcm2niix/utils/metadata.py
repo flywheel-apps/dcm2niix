@@ -10,7 +10,6 @@ from pathlib import Path
 import pydicom
 from pydicom.filereader import InvalidDicomError
 
-
 log = logging.getLogger(__name__)
 
 
@@ -176,8 +175,9 @@ def capture(
                     dicom_header = pydicom.read_file(dicom)
 
                     if dicom_header.get("SeriesDescription"):
-                        dicom_series_description = dicom_header.SeriesDescription \
-                            .replace(" ", "_")
+                        dicom_series_description = (
+                            dicom_header.SeriesDescription.replace(" ", "_")
+                        )
                     else:
                         dicom_series_description = ""
 
@@ -223,7 +223,7 @@ def capture(
 
         # Data files
         # Split sidecar into the "root" name by removing .json suffix
-        stem = sidecar.split('.json')[0]
+        stem = sidecar.split(".json")[0]
         for file in output_image_files:
             # Split image name by "root" name from sidecar
             substr = file.split(stem)

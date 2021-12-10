@@ -8,7 +8,6 @@ import subprocess
 
 import nibabel as nb
 
-
 log = logging.getLogger(__name__)
 
 
