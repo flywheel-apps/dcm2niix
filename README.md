@@ -1,3 +1,5 @@
+THIS REPOSITORY IS ARCHIVE. Please refer to https://gitlab.com/flywheel-io/flywheel-apps/dcm2niix for the new active repo.
+
 
 [![CircleCI](https://circleci.com/gh/flywheel-apps/dcm2niix.svg?style=shield)](https://app.circleci.com/pipelines/github/flywheel-apps/dcm2niix)
 [![Docker Pulls](https://img.shields.io/docker/pulls/flywheel/dcm2niix.svg)](https://hub.docker.com/r/flywheel/dcm2niix/)
