@@ -3,7 +3,7 @@ import datetime
 import flywheel
 import pandas as pd
 
-versions = ["1.0.0_1.0.20200331", "1.2.1_1.0.20201102_dev1"]
+versions = ["1.0.0_1.0.20200331", "1.2.1_1.0.20201102_dev1", "1.3.3_1.0.20211006"]
 
 
 input_dir = "~/Documents/flywheel/gears/dcm2niix/tests/instance"

@@ -5,8 +5,7 @@ import os
 import shutil
 from pathlib import Path
 
-from dcm2niix_gear.utils import metadata
-
+from fw_gear_dcm2niix.utils import metadata
 
 log = logging.getLogger(__name__)
 
@@ -162,7 +161,7 @@ def retain_gear_outputs(
 
         # Move data files, if indicated
         # Split sidecar into the "root" name by removing .json suffix
-        stem = sidecar.split('.json')[0]
+        stem = sidecar.split(".json")[0]
         for file in output_image_files:
             # Split image name by "root" name from sidecar
             substr = file.split(stem)

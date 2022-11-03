@@ -155,7 +155,6 @@ def convert_directory(
             else:
                 converter.inputs.args = f"-m {merge2d}"
 
-
         # dcm2niix command configurations for: output_nrrd
         converter.inputs.to_nrrd = output_nrrd
 

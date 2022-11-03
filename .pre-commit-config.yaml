@@ -1,0 +1,20 @@
+repos:
+  # Hooks for non python files
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: master
+    hooks:
+    - id: check-json
+    - id: check-toml
+    - id: pretty-format-json
+      args: ["--indent=2","--no-sort-keys","--autofix"]
+    - id: no-commit-to-branch           # protect master branch
+      args: ["--branch","master"]
+
+  # python related hooks
+  - repo: https://gitlab.com/flywheel-io/flywheel-apps/utils/pre-commit-hooks
+    rev: master
+    hooks:
+      - id: isort               # sort import section
+      - id: black               # linting
+      - id: validate-manifest   # validate manifest.json
+      - id: pytest

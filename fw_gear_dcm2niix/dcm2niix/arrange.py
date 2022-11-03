@@ -8,7 +8,6 @@ import shutil
 import tarfile
 import zipfile
 
-
 log = logging.getLogger(__name__)
 
 
@@ -151,7 +150,9 @@ def tally_files(dir_loc):
 
                 # avoid collisions from collapsing filepaths
                 if file_ij in file_name_path_dict.keys():
-                    log.error(f"more than one file with name of {file_ij} in directory tree, exiting.")
+                    log.error(
+                        f"more than one file with name of {file_ij} in directory tree, exiting."
+                    )
                     os.sys.exit(1)
 
                 # set of files (short paths or leaves) found in directory
@@ -176,10 +177,7 @@ def tally_files(dir_loc):
         except StopIteration:
             break
 
-    return \
-        file_set, \
-        file_tree, \
-        file_name_path_dict
+    return file_set, file_tree, file_name_path_dict
 
 
 def flatten_directory(dir_source, dir_target, overwrite=False):
@@ -207,8 +205,9 @@ def flatten_directory(dir_source, dir_target, overwrite=False):
     # TODO maybe write test for overwriting
 
     # source directory tally
-    file_set_source, file_tree_source, file_name_path_dict_source = \
-        tally_files(dir_source)
+    file_set_source, file_tree_source, file_name_path_dict_source = tally_files(
+        dir_source
+    )
 
     # check for already existing/clear way for target directory
     if os.path.exists(dir_target):
@@ -225,12 +224,13 @@ def flatten_directory(dir_source, dir_target, overwrite=False):
         shutil.move(file_name_path_dict_source[file], dir_target)
 
     # target directory tally
-    file_set_target, file_tree_target, file_name_path_dict_target = \
-        tally_files(dir_target)
+    file_set_target, file_tree_target, file_name_path_dict_target = tally_files(
+        dir_target
+    )
 
     # log before/after
-    file_tree_source_str = '\n'.join(file_tree_source)
-    file_tree_target_str = '\n'.join(file_tree_target)
+    file_tree_source_str = "\n".join(file_tree_source)
+    file_tree_target_str = "\n".join(file_tree_target)
     log.info(
         f"\n\nfile_tree_source:\n{file_tree_source_str}\n"
         f"\nfile_tree_target:\n{file_tree_target_str}\n\n"

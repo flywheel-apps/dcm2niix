@@ -6,9 +6,7 @@ import os
 
 import pydicom
 
-from dcm2niix_gear.dcm2niix import arrange
-from dcm2niix_gear.dcm2niix import dcm2niix_utils
-
+from fw_gear_dcm2niix.dcm2niix import arrange, dcm2niix_utils
 
 log = logging.getLogger(__name__)
 

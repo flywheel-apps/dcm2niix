@@ -4,12 +4,9 @@
 
 import flywheel_gear_toolkit
 
-from dcm2niix_gear.dcm2niix import prepare
-from dcm2niix_gear.dcm2niix import dcm2niix_utils
-from dcm2niix_gear.dcm2niix import dcm2niix_run
-from dcm2niix_gear.pydeface import pydeface_run
-from dcm2niix_gear.utils import parse_config
-from dcm2niix_gear.utils import resolve
+from fw_gear_dcm2niix.dcm2niix import dcm2niix_run, dcm2niix_utils, prepare
+from fw_gear_dcm2niix.pydeface import pydeface_run
+from fw_gear_dcm2niix.utils import parse_config, resolve
 
 
 def main(gear_context):
@@ -83,7 +80,9 @@ def main(gear_context):
 
 if __name__ == "__main__":
 
-    with flywheel_gear_toolkit.GearToolkitContext() as gear_context:
+    with flywheel_gear_toolkit.GearToolkitContext(
+        config_path="./config.json"
+    ) as gear_context:
         gear_context.init_logging()
         log = gear_context.log
         exit_status = main(gear_context)
